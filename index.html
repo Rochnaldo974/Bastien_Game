@@ -539,12 +539,12 @@ textarea.text-input { resize: vertical; min-height: 50px; }
 }
 
 /* ============ QUESTION ============ */
-#screen-question { padding-top: 80px; align-items: stretch; }
+#screen-question { padding-top: 44px; align-items: stretch; }
 .q-mini-progress {
   display: flex;
   gap: 6px;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 .q-mini-dot {
   width: 28px; height: 4px;
@@ -559,20 +559,20 @@ textarea.text-input { resize: vertical; min-height: 50px; }
   color: var(--neon-pink);
   letter-spacing: 0.3em;
   text-align: center;
-  margin-bottom: 8px;
-  font-size: 0.85rem;
+  margin-bottom: 2px;
+  font-size: 0.7rem;
 }
 .q-text {
   font-family: var(--display);
   font-weight: 700;
-  font-size: clamp(1.2rem, 3vw, 2.2rem);
+  font-size: clamp(1rem, 3vw, 2.2rem);
   text-align: center;
   color: #fff;
   max-width: 900px;
-  margin: 8px auto 28px;
-  line-height: 1.3;
+  margin: 4px auto 12px;
+  line-height: 1.25;
   text-shadow: 0 0 16px rgba(0, 255, 225, 0.5);
-  padding: 0 16px;
+  padding: 0 12px;
 }
 .q-text::before { content: "> "; color: var(--neon-cyan); }
 .q-text::after { content: " _"; color: var(--neon-cyan); animation: blink 0.7s step-end infinite; }
@@ -581,28 +581,28 @@ textarea.text-input { resize: vertical; min-height: 50px; }
 .guests-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 10px;
   max-width: 700px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 16px 40px;
+  padding: 0 10px 16px;
 }
 .guest-card {
   background: rgba(0, 255, 225, 0.05);
   border: 2px solid rgba(0, 255, 225, 0.4);
-  padding: 20px 14px;
+  padding: 10px 8px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--display);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   color: #fff;
   letter-spacing: 0.05em;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
 }
 .guest-card:hover {
   border-color: var(--neon-cyan);
@@ -633,14 +633,14 @@ textarea.text-input { resize: vertical; min-height: 50px; }
   50% { box-shadow: 0 0 40px rgba(255, 230, 0, 0.9); }
 }
 .guest-avatar {
-  width: 100px; height: 100px;
+  width: 56px; height: 56px;
   border-radius: 50%;
   background: rgba(255,255,255,0.1);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.8rem;
+  font-size: 1.8rem;
   border: 2px solid rgba(255,255,255,0.2);
 }
 .guest-card.selected .guest-avatar { border-color: var(--bg-0); }
@@ -815,20 +815,20 @@ textarea.text-input { resize: vertical; min-height: 50px; }
 /* ============ BOUTON RETOUR (fixe en haut) ============ */
 .back-btn {
   position: fixed;
-  top: 14px;
-  left: 14px;
+  top: 10px;
+  left: 10px;
   background: rgba(0, 0, 0, 0.85);
-  border: 2px solid var(--neon-cyan);
+  border: 1.5px solid var(--neon-cyan);
   color: var(--neon-cyan);
   font-family: var(--display);
   font-weight: 700;
-  font-size: 0.85rem;
-  padding: 10px 18px;
+  font-size: 0.65rem;
+  padding: 6px 10px;
   cursor: pointer;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.1em;
   z-index: 10000;
   transition: all 0.2s;
-  box-shadow: 0 0 12px rgba(0, 255, 225, 0.3);
+  box-shadow: 0 0 8px rgba(0, 255, 225, 0.3);
 }
 .back-btn:hover, .back-btn:active {
   background: var(--neon-cyan);
@@ -1196,8 +1196,8 @@ textarea.text-input { resize: vertical; min-height: 50px; }
 /* ============ TIMER 30s ============ */
 .q-timer-container {
   position: relative;
-  width: 70px; height: 70px;
-  margin: 0 auto 8px;
+  width: 52px; height: 52px;
+  margin: 0 auto 4px;
 }
 .q-timer-svg {
   width: 100%; height: 100%;
@@ -1230,7 +1230,7 @@ textarea.text-input { resize: vertical; min-height: 50px; }
   justify-content: center;
   font-family: var(--display);
   font-weight: 900;
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   color: var(--neon-cyan);
   text-shadow: 0 0 8px var(--neon-cyan);
 }
@@ -1247,23 +1247,23 @@ textarea.text-input { resize: vertical; min-height: 50px; }
 /* Quand le mode QCM est actif, on change le layout du guests-grid */
 .guests-grid.qcm-mode {
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 8px;
   max-width: 500px;
 }
 .qcm-card {
   background: rgba(0, 255, 225, 0.05);
   border: 2px solid rgba(0, 255, 225, 0.4);
-  padding: 18px 20px;
+  padding: 12px 14px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--mono);
-  font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+  font-size: clamp(0.85rem, 3vw, 1.1rem);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60px;
+  min-height: 44px;
   line-height: 1.4;
   width: 100%;
 }
@@ -1312,8 +1312,8 @@ textarea.text-input { resize: vertical; min-height: 50px; }
 @media (max-width: 600px) {
   .player-form { grid-template-columns: 64px 1fr auto; gap: 8px; }
   .avatar-preview { width: 56px; height: 56px; font-size: 1.5rem; }
-  .guests-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .guest-avatar { width: 80px; height: 80px; font-size: 2.2rem; }
+  .guests-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .guest-avatar { width: 48px; height: 48px; font-size: 1.6rem; }
   .q-assign-row { grid-template-columns: 1fr; }
 }
 </style>
