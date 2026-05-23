@@ -1529,6 +1529,14 @@ const TEST_MODE = false;
 /* Nombre de chiffres par cadenas */
 const DIGITS_PER_CADENAS = 3;
 
+/* Codes fixes des cadenas physiques */
+const CADENAS_CODES = [
+  [9, 7, 4],  // Cadenas 1
+  [4, 1, 7],  // Cadenas 2
+  [1, 8, 9],  // Cadenas 3
+  [1, 2, 3]   // Cadenas 4
+];
+
 /* =========================================================
    POOL DE QUESTIONS "Qui parmi nous" (cadenas 1-2-3)
    Toutes les questions fournies. Elles sont distribuées
@@ -2663,13 +2671,7 @@ function verifyAnswers() {
 
   if (allCorrect) {
     sndUnlockDigit();
-    let revealedDigit;
-    if (qcm) {
-      revealedDigit = Math.floor(Math.random() * 10);
-    } else {
-      const lastPlayer = players.find(p => p.id === gameState.reponses[gameState.reponses.length - 1].playerId);
-      revealedDigit = lastPlayer ? lastPlayer.chiffre : Math.floor(Math.random() * 10);
-    }
+    const revealedDigit = CADENAS_CODES[gameState.niveau][gameState.chiffre];
     msg.className = "verify-message success";
     msg.innerHTML = `✓ SÉRIE RÉUSSIE → CHIFFRE DÉBLOQUÉ : <strong style="font-size:1.5em">${revealedDigit}</strong>`;
     btnVerify.style.display = "none";
