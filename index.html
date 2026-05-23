@@ -3091,9 +3091,20 @@ function renderHTMLUpTo(source, maxChars) {
 
 function playCinematicScene(index) {
   if (index >= CINEMATIC_SCENES.length) {
-    // Fin de la cinématique : afficher le bouton start
+    // Fin de la cinématique : si la narration audio tourne encore, on attend sa fin
+    if (cineAudio.narration && !cineAudio.narration.ended) return;
+    // Sinon afficher l'écran final
     cineState.finished = true;
-    document.getElementById("cine-start-btn").classList.add("visible");
+    const vid = document.getElementById("cine-video");
+    if (vid) vid.classList.remove("visible");
+    const chapterEl = document.getElementById("cine-chapter");
+    const textEl = document.getElementById("cine-text");
+    chapterEl.textContent = "";
+    chapterEl.classList.remove("visible");
+    textEl.innerHTML = '<span style="font-size:1.6em; color:var(--neon-cyan); text-shadow:0 0 20px var(--neon-cyan);">MAINTENANT,<br>À TOI DE JOUER.</span>';
+    setTimeout(() => {
+      document.getElementById("cine-start-btn").classList.add("visible");
+    }, 800);
     return;
   }
   cineState.index = index;
@@ -3190,7 +3201,19 @@ function startCinematicAudio() {
         cineAudio.narration.onended = () => {
           stopCinematicAudio(1500);
           cineState.finished = true;
-          document.getElementById("cine-start-btn").classList.add("visible");
+          // Cacher la vidéo en fondu
+          const vid = document.getElementById("cine-video");
+          if (vid) vid.classList.remove("visible");
+          // Remplacer le texte par le message final
+          const chapterEl = document.getElementById("cine-chapter");
+          const textEl = document.getElementById("cine-text");
+          chapterEl.textContent = "";
+          chapterEl.classList.remove("visible");
+          textEl.innerHTML = '<span style="font-size:1.6em; color:var(--neon-cyan); text-shadow:0 0 20px var(--neon-cyan);">MAINTENANT,<br>À TOI DE JOUER.</span>';
+          // Afficher le bouton
+          setTimeout(() => {
+            document.getElementById("cine-start-btn").classList.add("visible");
+          }, 800);
         };
       } catch(e) { console.warn("Erreur narration:", e); }
     }, 3000);
