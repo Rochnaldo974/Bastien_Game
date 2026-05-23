@@ -3098,9 +3098,9 @@ function playCinematicScene(index) {
     const vid = document.getElementById("cine-video");
     if (vid) vid.classList.remove("visible");
     const chapterEl = document.getElementById("cine-chapter");
+    chapterEl.style.display = "none";
     const textEl = document.getElementById("cine-text");
-    chapterEl.textContent = "";
-    chapterEl.classList.remove("visible");
+    textEl.style.display = "block";
     textEl.innerHTML = '<span style="font-size:1.6em; color:var(--neon-cyan); text-shadow:0 0 20px var(--neon-cyan);">MAINTENANT,<br>À TOI DE JOUER.</span>';
     setTimeout(() => {
       document.getElementById("cine-start-btn").classList.add("visible");
@@ -3204,11 +3204,12 @@ function startCinematicAudio() {
           // Cacher la vidéo en fondu
           const vid = document.getElementById("cine-video");
           if (vid) vid.classList.remove("visible");
-          // Remplacer le texte par le message final
+          // Cacher chapitre
           const chapterEl = document.getElementById("cine-chapter");
+          chapterEl.style.display = "none";
+          // Afficher le message final
           const textEl = document.getElementById("cine-text");
-          chapterEl.textContent = "";
-          chapterEl.classList.remove("visible");
+          textEl.style.display = "block";
           textEl.innerHTML = '<span style="font-size:1.6em; color:var(--neon-cyan); text-shadow:0 0 20px var(--neon-cyan);">MAINTENANT,<br>À TOI DE JOUER.</span>';
           // Afficher le bouton
           setTimeout(() => {
