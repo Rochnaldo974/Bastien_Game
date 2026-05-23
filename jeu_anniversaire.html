@@ -1,0 +1,3342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OPÉRATION TRÉSOR // Jeu d'Anniversaire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-0: #05060a;
+  --bg-1: #0a0e1a;
+  --neon-cyan: #00ffe1;
+  --neon-pink: #ff2bd6;
+  --neon-green: #39ff14;
+  --neon-red: #ff2e4c;
+  --neon-yellow: #ffe600;
+  --grid: rgba(0, 255, 225, 0.06);
+  --mono: 'Share Tech Mono', monospace;
+  --display: 'Orbitron', sans-serif;
+  --terminal: 'Major Mono Display', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  min-height: 100%;
+  background: var(--bg-0);
+  color: var(--neon-cyan);
+  font-family: var(--mono);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridShift 20s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px),
+    radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: multiply;
+}
+
+@keyframes gridShift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(40px, 40px); }
+}
+
+.screen {
+  position: relative;
+  min-height: 100vh;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  z-index: 1;
+}
+.screen.active { display: flex; animation: fadeIn 0.6s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.title-glitch {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(1.8rem, 6vw, 4.5rem);
+  letter-spacing: 0.12em;
+  color: var(--neon-cyan);
+  text-shadow:
+    0 0 8px var(--neon-cyan),
+    0 0 24px rgba(0, 255, 225, 0.5),
+    2px 0 0 var(--neon-pink),
+    -2px 0 0 var(--neon-green);
+  animation: glitch 4s infinite;
+  text-align: center;
+}
+
+@keyframes glitch {
+  0%, 90%, 100% { transform: translate(0, 0); }
+  92% { transform: translate(-2px, 1px); }
+  94% { transform: translate(2px, -1px); }
+  96% { transform: translate(-1px, 0); }
+}
+
+.subtitle {
+  font-family: var(--terminal);
+  color: var(--neon-pink);
+  font-size: clamp(0.75rem, 1.8vw, 1rem);
+  letter-spacing: 0.3em;
+  margin-top: 12px;
+  text-shadow: 0 0 8px var(--neon-pink);
+  text-align: center;
+}
+
+.btn {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+  letter-spacing: 0.2em;
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--neon-cyan);
+  border: 2px solid var(--neon-cyan);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+.btn:hover, .btn:focus {
+  background: var(--neon-cyan);
+  color: var(--bg-0);
+  box-shadow: 0 0 30px var(--neon-cyan);
+  transform: translateY(-2px);
+  outline: none;
+}
+.btn:active { transform: translateY(0); }
+.btn.pink { color: var(--neon-pink); border-color: var(--neon-pink); }
+.btn.pink:hover { background: var(--neon-pink); color: var(--bg-0); box-shadow: 0 0 30px var(--neon-pink); }
+.btn.green { color: var(--neon-green); border-color: var(--neon-green); }
+.btn.green:hover { background: var(--neon-green); color: var(--bg-0); box-shadow: 0 0 30px var(--neon-green); }
+.btn.small { padding: 8px 16px; font-size: 0.75rem; letter-spacing: 0.15em; }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+#screen-welcome { justify-content: center; }
+.narrative {
+  max-width: 680px;
+  margin: 30px auto 28px;
+  font-family: var(--mono);
+  color: rgba(255,255,255,0.85);
+  font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+  line-height: 1.8;
+  text-align: center;
+  border: 1px solid rgba(0, 255, 225, 0.3);
+  padding: 20px 24px;
+  background: rgba(0, 255, 225, 0.04);
+  position: relative;
+}
+.narrative::before, .narrative::after {
+  content: ""; position: absolute;
+  width: 14px; height: 14px;
+  border: 2px solid var(--neon-cyan);
+}
+.narrative::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+.narrative::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+/* ============ SETUP ============ */
+#screen-setup { padding-top: 30px; padding-bottom: 60px; align-items: stretch; }
+.setup-container { width: 100%; max-width: 1000px; margin: 0 auto; }
+.setup-step { display: none; margin-top: 20px; }
+.setup-step.active { display: block; animation: fadeIn 0.4s ease; }
+
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.step-dot {
+  font-family: var(--mono);
+  color: rgba(0, 255, 225, 0.4);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  padding: 6px 12px;
+  border: 1px solid rgba(0, 255, 225, 0.2);
+}
+.step-dot.active { color: var(--neon-cyan); border-color: var(--neon-cyan); box-shadow: 0 0 12px rgba(0, 255, 225, 0.4); }
+.step-dot.done { color: var(--neon-green); border-color: var(--neon-green); }
+
+.player-form {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  background: rgba(0, 255, 225, 0.04);
+  border: 1px solid rgba(0, 255, 225, 0.2);
+  padding: 12px;
+}
+.avatar-preview {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(0, 255, 225, 0.15);
+  border: 2px solid var(--neon-cyan);
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+.avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-preview input { display: none; }
+.avatar-preview .change-hint {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.7);
+  color: var(--neon-cyan);
+  font-size: 0.55rem;
+  text-align: center;
+  padding: 2px;
+  letter-spacing: 0.1em;
+  font-family: var(--mono);
+}
+
+.text-input, .num-input, .select-input, textarea.text-input {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(0, 255, 225, 0.4);
+  color: #fff;
+  font-family: var(--mono);
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s;
+  width: 100%;
+}
+textarea.text-input { resize: vertical; min-height: 50px; }
+.text-input:focus, .num-input:focus, .select-input:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 255, 225, 0.3);
+}
+.num-input {
+  text-align: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--neon-pink);
+}
+.btn-remove {
+  background: transparent;
+  border: 1px solid var(--neon-red);
+  color: var(--neon-red);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+.btn-remove:hover { background: var(--neon-red); color: var(--bg-0); }
+
+.cadenas-group {
+  border-left: 3px solid var(--neon-cyan);
+  padding-left: 16px;
+  margin-bottom: 32px;
+}
+.cadenas-group h3 {
+  font-family: var(--display);
+  color: var(--neon-cyan);
+  letter-spacing: 0.15em;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+.chiffre-group {
+  border-left: 2px solid var(--neon-pink);
+  padding-left: 14px;
+  margin-bottom: 22px;
+  background: rgba(255, 43, 214, 0.03);
+  padding: 14px;
+}
+.chiffre-group h4 {
+  font-family: var(--display);
+  color: var(--neon-pink);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.question-assign {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 225, 0.2);
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.question-assign .q-label {
+  color: var(--neon-cyan);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 6px;
+}
+.question-assign textarea {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+.q-assign-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.q-assign-row label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: rgba(0, 255, 225, 0.7);
+  letter-spacing: 0.15em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.leurres-section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+.leurres-section .q-label {
+  color: rgba(255, 230, 0, 0.8);
+  margin-bottom: 6px;
+}
+.leurres-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.leurre-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid rgba(0, 255, 225, 0.3);
+  background: rgba(0,0,0,0.3);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.7);
+  transition: all 0.15s;
+  user-select: none;
+}
+.leurre-chip:hover { border-color: var(--neon-cyan); color: #fff; }
+.leurre-chip.checked {
+  background: rgba(0, 255, 225, 0.2);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+.leurre-chip.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.btn-add-q {
+  background: transparent;
+  border: 1px dashed var(--neon-green);
+  color: var(--neon-green);
+  padding: 8px 14px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+  transition: all 0.2s;
+  width: 100%;
+  text-align: center;
+}
+.btn-add-q:hover { background: rgba(57, 255, 20, 0.15); }
+.btn-remove-q {
+  background: transparent;
+  border: none;
+  color: var(--neon-red);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  float: right;
+  transition: all 0.15s;
+}
+.btn-remove-q:hover { color: #fff; background: var(--neon-red); }
+.q-count-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--neon-green);
+  border: 1px solid var(--neon-green);
+  padding: 2px 8px;
+  letter-spacing: 0.1em;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.setup-error {
+  color: var(--neon-red);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  margin: 12px 0;
+  padding: 10px;
+  border: 1px dashed var(--neon-red);
+  background: rgba(255, 46, 76, 0.1);
+  display: none;
+}
+.setup-error.active { display: block; }
+
+.setup-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+/* ============ HUD ============ */
+.hud {
+  position: fixed; top: 0; left: 0; right: 0;
+  display: none;
+  justify-content: flex-end;
+  padding: 12px 20px 12px 110px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  z-index: 50;
+  background: linear-gradient(180deg, rgba(0,0,0,0.85), transparent);
+  pointer-events: none;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.hud.active { display: flex; }
+.hud-item {
+  display: flex; align-items: center; gap: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.hud-label { color: rgba(0, 255, 225, 0.6); }
+.hud-value { color: var(--neon-cyan); font-weight: bold; text-shadow: 0 0 6px var(--neon-cyan); }
+
+/* ============ LEVEL INTRO ============ */
+#screen-level-intro { justify-content: center; }
+.level-intro { text-align: center; }
+.level-intro .level-num {
+  font-family: var(--terminal);
+  color: var(--neon-pink);
+  font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+  letter-spacing: 0.4em;
+  margin-bottom: 12px;
+}
+.level-intro .level-title {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 4.5vw, 3rem);
+  color: var(--neon-cyan);
+  text-shadow: 0 0 20px var(--neon-cyan);
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+.level-intro .level-desc {
+  max-width: 540px;
+  color: rgba(255,255,255,0.7);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+.loading-bar {
+  width: min(420px, 80vw);
+  height: 6px;
+  background: rgba(0, 255, 225, 0.15);
+  border: 1px solid var(--neon-cyan);
+  margin: 24px auto;
+  position: relative;
+  overflow: hidden;
+}
+.loading-bar-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+  box-shadow: 0 0 20px var(--neon-cyan);
+}
+.progress-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 20px auto;
+}
+.dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--neon-cyan);
+}
+.dot.done { background: var(--neon-green); border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+.dot.current { background: var(--neon-cyan); box-shadow: 0 0 12px var(--neon-cyan); }
+
+/* ============ LOCK PROGRESS (chiffres déjà débloqués) ============ */
+.lock-progress {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin: 20px auto 30px;
+}
+.lock-slot {
+  width: clamp(50px, 10vw, 80px);
+  height: clamp(64px, 12vw, 100px);
+  border: 2px solid rgba(0, 255, 225, 0.4);
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  color: rgba(0, 255, 225, 0.3);
+  position: relative;
+  transition: all 0.4s ease;
+}
+.lock-slot.current {
+  border-color: var(--neon-yellow);
+  box-shadow: 0 0 16px var(--neon-yellow);
+  animation: currentPulse 1.5s ease infinite;
+}
+@keyframes currentPulse {
+  0%, 100% { box-shadow: 0 0 16px var(--neon-yellow); }
+  50% { box-shadow: 0 0 32px var(--neon-yellow); }
+}
+.lock-slot.unlocked {
+  border-color: var(--neon-green);
+  background: rgba(57, 255, 20, 0.1);
+  color: var(--neon-green);
+  text-shadow: 0 0 12px var(--neon-green);
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
+}
+.lock-slot.reveal { animation: revealNum 0.8s ease; }
+@keyframes revealNum {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.4) rotateY(180deg); }
+  60% { transform: scale(1.2) rotateY(360deg); }
+  100% { transform: scale(1) rotateY(360deg); }
+}
+
+/* ============ QUESTION ============ */
+#screen-question { padding-top: 80px; align-items: stretch; }
+.q-mini-progress {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.q-mini-dot {
+  width: 28px; height: 4px;
+  background: rgba(0, 255, 225, 0.2);
+  border-radius: 2px;
+}
+.q-mini-dot.done { background: var(--neon-green); box-shadow: 0 0 6px var(--neon-green); }
+.q-mini-dot.current { background: var(--neon-cyan); box-shadow: 0 0 6px var(--neon-cyan); }
+
+.q-counter {
+  font-family: var(--mono);
+  color: var(--neon-pink);
+  letter-spacing: 0.3em;
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+.q-text {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 3vw, 2.2rem);
+  text-align: center;
+  color: #fff;
+  max-width: 900px;
+  margin: 8px auto 28px;
+  line-height: 1.3;
+  text-shadow: 0 0 16px rgba(0, 255, 225, 0.5);
+  padding: 0 16px;
+}
+.q-text::before { content: "> "; color: var(--neon-cyan); }
+.q-text::after { content: " _"; color: var(--neon-cyan); animation: blink 0.7s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.guests-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+.guest-card {
+  background: rgba(0, 255, 225, 0.05);
+  border: 2px solid rgba(0, 255, 225, 0.4);
+  padding: 20px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #fff;
+  letter-spacing: 0.05em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.guest-card:hover {
+  border-color: var(--neon-cyan);
+  background: rgba(0, 255, 225, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(0, 255, 225, 0.3);
+}
+.guest-card.selected {
+  background: var(--neon-cyan);
+  color: var(--bg-0);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 40px var(--neon-cyan);
+}
+
+/* MODE TEST — surlignage de la bonne réponse */
+.guest-card.test-correct {
+  border-color: var(--neon-yellow);
+  background: rgba(255, 230, 0, 0.12);
+  box-shadow: 0 0 24px rgba(255, 230, 0, 0.5);
+  animation: testPulse 1.8s ease infinite;
+}
+.guest-card.test-correct:hover {
+  background: rgba(255, 230, 0, 0.25);
+  box-shadow: 0 0 36px rgba(255, 230, 0, 0.8);
+}
+@keyframes testPulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(255, 230, 0, 0.5); }
+  50% { box-shadow: 0 0 40px rgba(255, 230, 0, 0.9); }
+}
+.guest-avatar {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.8rem;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+.guest-card.selected .guest-avatar { border-color: var(--bg-0); }
+.guest-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ============ VÉRIFICATION CODE ============ */
+#screen-verify { justify-content: center; }
+.verify-title {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  text-align: center;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 16px var(--neon-cyan);
+  letter-spacing: 0.15em;
+  margin-bottom: 30px;
+}
+.q-recap {
+  display: flex;
+  gap: 12px;
+  margin: 20px auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 600px;
+}
+.q-recap-slot {
+  width: clamp(80px, 18vw, 130px);
+  border: 2px solid var(--neon-cyan);
+  background: rgba(0, 255, 225, 0.08);
+  padding: 12px 8px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: #fff;
+  transition: all 0.3s ease;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.q-recap-slot .q-recap-num {
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--neon-cyan);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+}
+.q-recap-slot .q-recap-avatar {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  background: rgba(255,255,255,0.1);
+}
+.q-recap-slot .q-recap-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.q-recap-slot .q-recap-name { font-weight: bold; }
+.q-recap-slot.correct {
+  border-color: var(--neon-green);
+  background: rgba(57, 255, 20, 0.1);
+}
+.q-recap-slot.correct .q-recap-num { color: var(--neon-green); }
+.q-recap-slot.wrong {
+  border-color: var(--neon-red);
+  background: rgba(255, 46, 76, 0.15);
+  color: var(--neon-red);
+  cursor: pointer;
+  animation: wrongShake 0.5s ease;
+}
+.q-recap-slot.wrong:hover {
+  background: rgba(255, 46, 76, 0.3);
+  transform: scale(1.05);
+}
+.q-recap-slot.wrong .q-recap-num { color: var(--neon-red); }
+
+@keyframes wrongShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.verify-message {
+  font-family: var(--mono);
+  font-size: 1rem;
+  margin: 24px auto;
+  max-width: 600px;
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+.verify-message.error { color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red); }
+.verify-message.success { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+
+/* ============ FLASH ============ */
+.flash {
+  position: fixed; inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(2.5rem, 9vw, 7rem);
+  letter-spacing: 0.15em;
+  text-align: center;
+  padding: 24px;
+}
+.flash.active { display: flex; animation: flashIn 0.4s ease; }
+@keyframes flashIn {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+.flash.denied {
+  background: rgba(255, 46, 76, 0.15);
+  color: var(--neon-red);
+  text-shadow: 0 0 30px var(--neon-red), 4px 0 var(--neon-yellow), -4px 0 var(--neon-cyan);
+  animation: flashIn 0.4s ease, shake 0.5s ease 0.4s;
+}
+.flash.granted {
+  background: rgba(57, 255, 20, 0.1);
+  color: var(--neon-green);
+  text-shadow: 0 0 30px var(--neon-green);
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-20px); }
+  40%, 80% { transform: translateX(20px); }
+}
+
+/* ============ VICTOIRE ============ */
+#screen-victory { justify-content: center; text-align: center; }
+.victory-title {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(2.5rem, 8vw, 6rem);
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink), var(--neon-yellow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.1em;
+  filter: drop-shadow(0 0 20px rgba(0, 255, 225, 0.5));
+  animation: victoryPulse 2s ease infinite;
+  margin-bottom: 20px;
+}
+@keyframes victoryPulse {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(0, 255, 225, 0.5)); }
+  50% { filter: drop-shadow(0 0 40px rgba(255, 43, 214, 0.8)); }
+}
+.victory-message {
+  font-family: var(--mono);
+  color: #fff;
+  max-width: 620px;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  line-height: 1.8;
+  margin: 24px auto;
+}
+.confetti {
+  position: fixed;
+  width: 10px; height: 10px;
+  pointer-events: none;
+  z-index: 500;
+}
+
+.pulse-glow { animation: pulseGlow 2s ease infinite; }
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 10px currentColor; }
+  50% { box-shadow: 0 0 30px currentColor, 0 0 60px currentColor; }
+}
+
+/* ============ BOUTON RETOUR (fixe en haut) ============ */
+.back-btn {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 10px 18px;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  z-index: 10000;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px rgba(0, 255, 225, 0.3);
+}
+.back-btn:hover, .back-btn:active {
+  background: var(--neon-cyan);
+  color: var(--bg-0);
+  box-shadow: 0 0 20px var(--neon-cyan);
+  transform: scale(1.05);
+}
+.back-btn.hidden { display: none; }
+
+/* ============ MODALE CONFIRMATION ============ */
+.confirm-modal {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 24px;
+}
+.confirm-modal.active { display: flex; animation: fadeIn 0.3s ease; }
+.confirm-modal-content {
+  background: var(--bg-1);
+  border: 2px solid var(--neon-yellow);
+  padding: 28px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(255, 230, 0, 0.4);
+}
+.confirm-modal-content h3 {
+  font-family: var(--display);
+  color: var(--neon-yellow);
+  letter-spacing: 0.2em;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+.confirm-modal-content p {
+  color: #fff;
+  font-family: var(--mono);
+  line-height: 1.6;
+  margin-bottom: 22px;
+  font-size: 0.9rem;
+}
+.confirm-modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ============ CINÉMATIQUE D'INTRO ============ */
+#screen-cinematic {
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+#screen-cinematic::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(0, 255, 225, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at top, rgba(255, 43, 214, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Vidéo dans un cadre centré (format portrait) — adapté mobile */
+.cine-video {
+  position: relative;
+  width: clamp(260px, 70vw, 400px);
+  aspect-ratio: 9 / 16;
+  height: auto;
+  object-fit: cover;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  border: 3px solid var(--neon-cyan);
+  box-shadow:
+    0 0 30px rgba(0, 255, 225, 0.5),
+    0 0 60px rgba(0, 255, 225, 0.2),
+    inset 0 0 20px rgba(0, 0, 0, 0.4);
+  background: #000;
+  display: block;
+  margin: 12vh auto 0;
+}
+.cine-video.visible { opacity: 1; }
+
+/* Cadre néon décoratif autour de la vidéo (coins lumineux) */
+.cine-video-frame {
+  position: relative;
+  display: inline-block;
+  z-index: 5;
+  margin: 0 auto;
+}
+.cine-video-frame::before,
+.cine-video-frame::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--neon-pink);
+  pointer-events: none;
+  z-index: 6;
+}
+.cine-video-frame::before {
+  top: -10px; left: -10px;
+  border-right: none; border-bottom: none;
+  box-shadow: -2px -2px 10px rgba(255, 43, 214, 0.6);
+}
+.cine-video-frame::after {
+  bottom: -10px; right: -10px;
+  border-left: none; border-top: none;
+  box-shadow: 2px 2px 10px rgba(255, 43, 214, 0.6);
+}
+
+/* Plus d'overlay plein écran : il assombrirait toute la pièce alors qu'on a juste un cadre */
+.cine-overlay { display: none; }
+
+.cine-particle {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: cineParticle 6s linear infinite;
+  z-index: 2;
+  box-shadow: 0 0 6px currentColor;
+}
+@keyframes cineParticle {
+  0% { opacity: 0; transform: translateY(100vh) scale(0.5); }
+  10%, 90% { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(-20px) scale(1.5); }
+}
+
+.cine-container {
+  position: relative;
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+  z-index: 5;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.cine-chapter { display: none; }
+.cine-text { display: none; }
+.cine-cursor { display: none; }
+
+.cine-highlight {
+  color: var(--neon-yellow);
+  text-shadow: 0 0 14px var(--neon-yellow);
+  font-weight: 700;
+}
+.cine-highlight-cyan {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 14px var(--neon-cyan);
+  font-weight: 700;
+}
+.cine-highlight-pink {
+  color: var(--neon-pink);
+  text-shadow: 0 0 14px var(--neon-pink);
+  font-weight: 700;
+}
+
+.cine-controls {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.cine-skip {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  padding: 8px 14px;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  z-index: 100;
+  transition: all 0.2s;
+}
+.cine-skip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+  color: #fff;
+}
+
+.cine-voice-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+}
+.cine-voice-btn {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(0, 255, 225, 0.4);
+  color: var(--neon-cyan);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  padding: 6px 12px;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  transition: all 0.2s;
+}
+.cine-voice-btn:hover { background: rgba(0, 255, 225, 0.15); }
+
+.cine-start-btn {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.cine-start-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============ SLOT MACHINE — OUVERTURE CADENAS ============ */
+#screen-unlock { justify-content: center; text-align: center; }
+.unlock-title {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(1.4rem, 4vw, 2.6rem);
+  color: var(--neon-yellow);
+  text-shadow: 0 0 20px var(--neon-yellow), 0 0 40px var(--neon-yellow);
+  letter-spacing: 0.2em;
+  margin-bottom: 30px;
+  animation: unlockPulse 1s ease infinite;
+}
+@keyframes unlockPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.slot-display {
+  display: flex;
+  gap: 14px;
+  margin: 30px auto;
+  justify-content: center;
+  flex-wrap: wrap;
+  perspective: 600px;
+}
+.slot-cell {
+  width: clamp(70px, 14vw, 120px);
+  height: clamp(100px, 18vw, 160px);
+  border: 3px solid var(--neon-cyan);
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0.8) 0%,
+    rgba(0, 255, 225, 0.15) 50%,
+    rgba(0,0,0,0.8) 100%);
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 30px rgba(0, 255, 225, 0.3), 0 0 20px rgba(0, 255, 225, 0.4);
+  transition: all 0.3s ease;
+}
+.slot-cell::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0.9) 0%,
+    transparent 30%,
+    transparent 70%,
+    rgba(0,0,0,0.9) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+.slot-reel {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  color: var(--neon-cyan);
+  text-shadow: 0 0 16px var(--neon-cyan);
+  line-height: clamp(100px, 18vw, 160px);
+}
+.slot-cell.spinning .slot-reel {
+  animation: slotSpin 0.15s linear infinite;
+}
+@keyframes slotSpin {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(calc(clamp(100px, 18vw, 160px) * -10)); }
+}
+.slot-cell.locked {
+  border-color: var(--neon-green);
+  box-shadow: inset 0 0 30px rgba(57, 255, 20, 0.4), 0 0 30px var(--neon-green);
+  animation: slotLockFlash 0.6s ease;
+}
+.slot-cell.locked .slot-reel {
+  color: var(--neon-green);
+  text-shadow: 0 0 20px var(--neon-green);
+}
+@keyframes slotLockFlash {
+  0% { transform: scale(1.3); filter: brightness(2); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.unlock-status {
+  font-family: var(--mono);
+  color: var(--neon-pink);
+  letter-spacing: 0.3em;
+  margin: 20px auto;
+  font-size: 0.9rem;
+  min-height: 24px;
+  text-shadow: 0 0 8px var(--neon-pink);
+}
+
+.unlock-message {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  color: var(--neon-green);
+  text-shadow: 0 0 20px var(--neon-green);
+  margin: 30px auto 20px;
+  letter-spacing: 0.1em;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.unlock-message.visible { opacity: 1; }
+
+.unlock-reward {
+  font-family: var(--mono);
+  color: rgba(255, 230, 0, 0.95);
+  font-size: clamp(0.95rem, 2vw, 1.2rem);
+  margin: 16px auto;
+  max-width: 600px;
+  line-height: 1.6;
+  text-align: center;
+  letter-spacing: 0.05em;
+  padding: 16px 24px;
+  border: 1px solid rgba(255, 230, 0, 0.4);
+  background: rgba(255, 230, 0, 0.05);
+  opacity: 0;
+  transition: opacity 0.6s ease 0.3s;
+}
+.unlock-reward.visible { opacity: 1; }
+
+.unlock-btn {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease 0.8s, transform 0.6s ease 0.8s;
+  margin-top: 24px;
+}
+.unlock-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============ TIMER 30s ============ */
+.q-timer-container {
+  position: relative;
+  width: 70px; height: 70px;
+  margin: 0 auto 8px;
+}
+.q-timer-svg {
+  width: 100%; height: 100%;
+  transform: rotate(-90deg);
+}
+.q-timer-bg {
+  fill: none;
+  stroke: rgba(0, 255, 225, 0.15);
+  stroke-width: 6;
+}
+.q-timer-ring {
+  fill: none;
+  stroke: var(--neon-cyan);
+  stroke-width: 6;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear, stroke 0.3s;
+  filter: drop-shadow(0 0 6px var(--neon-cyan));
+}
+.q-timer-ring.urgent {
+  stroke: var(--neon-red);
+  filter: drop-shadow(0 0 10px var(--neon-red));
+}
+.q-timer-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 1.4rem;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px var(--neon-cyan);
+}
+.q-timer-text.urgent {
+  color: var(--neon-red);
+  text-shadow: 0 0 12px var(--neon-red);
+  animation: timerBlink 0.5s step-end infinite;
+}
+@keyframes timerBlink {
+  50% { opacity: 0.4; }
+}
+
+/* ============ QCM CARDS ============ */
+/* Quand le mode QCM est actif, on change le layout du guests-grid */
+.guests-grid.qcm-mode {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  max-width: 500px;
+}
+.qcm-card {
+  background: rgba(0, 255, 225, 0.05);
+  border: 2px solid rgba(0, 255, 225, 0.4);
+  padding: 18px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--mono);
+  font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  line-height: 1.4;
+  width: 100%;
+}
+.qcm-card:hover {
+  border-color: var(--neon-cyan);
+  background: rgba(0, 255, 225, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(0, 255, 225, 0.3);
+}
+.qcm-card:active {
+  transform: translateY(0);
+  background: rgba(0, 255, 225, 0.25);
+}
+.qcm-card.selected {
+  background: var(--neon-cyan);
+  color: var(--bg-0);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 40px var(--neon-cyan);
+}
+.qcm-card.test-correct {
+  border-color: var(--neon-yellow);
+  background: rgba(255, 230, 0, 0.12);
+  box-shadow: 0 0 24px rgba(255, 230, 0, 0.5);
+  animation: testPulse 1.8s ease infinite;
+}
+.qcm-card.test-correct:hover {
+  background: rgba(255, 230, 0, 0.25);
+  box-shadow: 0 0 36px rgba(255, 230, 0, 0.8);
+}
+
+/* ============ LEVEL INTRO — QCM special text ============ */
+.level-intro-special {
+  max-width: 540px;
+  color: var(--neon-yellow);
+  font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+  line-height: 1.7;
+  margin: 16px auto 20px;
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 230, 0, 0.4);
+  background: rgba(255, 230, 0, 0.06);
+  text-align: center;
+  font-family: var(--mono);
+  text-shadow: 0 0 8px rgba(255, 230, 0, 0.4);
+}
+
+@media (max-width: 600px) {
+  .player-form { grid-template-columns: 64px 1fr auto; gap: 8px; }
+  .avatar-preview { width: 56px; height: 56px; font-size: 1.5rem; }
+  .guests-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .guest-avatar { width: 80px; height: 80px; font-size: 2.2rem; }
+  .q-assign-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Bouton retour global (visible pendant le jeu) -->
+<button class="back-btn hidden" id="back-btn" onclick="goBack()">← RETOUR</button>
+
+<!-- Modale de confirmation pour le retour -->
+<div class="confirm-modal" id="confirm-modal">
+  <div class="confirm-modal-content">
+    <h3>⚠ RETOUR EN ARRIÈRE</h3>
+    <p id="confirm-modal-text">Tu vas perdre la progression du chiffre en cours. Continuer ?</p>
+    <div class="confirm-modal-buttons">
+      <button class="btn small" onclick="closeConfirmModal()">NON, RESTER</button>
+      <button class="btn small green" onclick="confirmGoBack()">OUI, REVENIR</button>
+    </div>
+  </div>
+</div>
+
+<div class="hud" id="hud">
+  <div class="hud-item"><span class="hud-label">CADENAS</span> <span class="hud-value" id="hud-lock">1/4</span></div>
+  <div class="hud-item"><span class="hud-label">CHIFFRE</span> <span class="hud-value" id="hud-digit">1/3</span></div>
+  <div class="hud-item"><span class="hud-label">JOUEUR</span> <span class="hud-value" id="hud-player">—</span></div>
+</div>
+
+<!-- ============ ÉCRAN ACCUEIL ============ -->
+<div class="screen active" id="screen-welcome">
+  <h1 class="title-glitch">OPÉRATION<br>TRÉSOR</h1>
+  <p class="subtitle">// PROTOCOLE D'ANNIVERSAIRE //</p>
+  <div class="narrative">
+    <p>Avant de lancer le jeu, configure-le en 3 étapes :<br><br>
+    1️⃣ Ajouter les <strong style="color:var(--neon-pink)">joueurs</strong><br>
+    2️⃣ Définir <strong style="color:var(--neon-pink)">questions + réponses</strong> de chaque cadenas<br>
+    3️⃣ Lancer la partie 🎮<br><br>
+    <span style="color:var(--neon-cyan); font-size: 0.85rem;">📊 4 cadenas × 3 chiffres — nombre de questions libre par chiffre</span><br><br>
+    <span style="color:var(--neon-yellow);">⚠ Configuration ~15 min. Fais-le avant l'arrivée du joueur principal !</span></p>
+  </div>
+  <button class="btn pulse-glow" onclick="goSetup()">⚙ CONFIGURER LE JEU</button>
+</div>
+
+<!-- ============ ÉCRAN SETUP ============ -->
+<div class="screen" id="screen-setup">
+  <div class="setup-container">
+    <h2 class="title-glitch" style="font-size: clamp(1.4rem, 4vw, 2.4rem);">CONFIGURATION</h2>
+
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot-1">1. JOUEURS</div>
+      <div class="step-dot" id="dot-2">2. QUESTIONS</div>
+      <div class="step-dot" id="dot-3">3. PRÊT</div>
+    </div>
+
+    <!-- ÉTAPE 1 : JOUEURS -->
+    <div class="setup-step active" id="step-players">
+      <p style="text-align:center; color:rgba(255,255,255,0.7); margin-bottom:20px; font-family:var(--mono); font-size:0.9rem;">
+        Ajoute tous les invités avec leur <strong style="color:var(--neon-pink)">prénom</strong> et leur <strong style="color:var(--neon-pink)">photo</strong>.<br>
+        <span style="color:var(--neon-yellow); font-size: 0.8rem;">💡 Aucune limite — autant que tu veux !</span>
+      </p>
+      <div id="players-list"></div>
+      <button class="btn pink small" onclick="addPlayer()" style="margin-top:10px;">+ AJOUTER UN JOUEUR</button>
+      <div class="setup-error" id="error-players"></div>
+      <div class="setup-nav">
+        <button class="btn small" onclick="goWelcome()">← RETOUR</button>
+        <button class="btn green" onclick="goToStep2()">SUIVANT →</button>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 2 : QUESTIONS -->
+    <div class="setup-step" id="step-answers">
+      <p style="text-align:center; color:rgba(255,255,255,0.7); margin-bottom:20px; font-family:var(--mono); font-size:0.9rem;">
+        <strong style="color:var(--neon-pink)">Cadenas 1-3</strong> : choisis le joueur qui est la bonne réponse. Les 3 leurres sont générés automatiquement.<br>
+        <strong style="color:var(--neon-yellow)">Cadenas 4 (QCM)</strong> : vérifie les réponses pré-remplies. La 1ère réponse est la bonne (mélangée à l'affichage).
+      </p>
+      <div id="answers-list"></div>
+      <div class="setup-error" id="error-answers"></div>
+      <div class="setup-nav">
+        <button class="btn small" onclick="goToStep1()">← RETOUR</button>
+        <button class="btn green" onclick="goToStep3()">SUIVANT →</button>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 3 : PRÊT -->
+    <div class="setup-step" id="step-ready">
+      <div style="text-align:center; padding: 40px 20px;">
+        <div class="subtitle" style="color:var(--neon-green); margin-bottom: 16px;">// CONFIGURATION TERMINÉE //</div>
+        <h2 class="title-glitch" style="font-size: clamp(1.6rem, 4vw, 3rem); margin-bottom: 30px;">PRÊT À JOUER</h2>
+        <div class="narrative" style="border-color: var(--neon-green); background: rgba(57, 255, 20, 0.04);">
+          <p>Tout est en place 🎮<br><br>
+          Donne discrètement à chaque invité <strong style="color:var(--neon-yellow)">son chiffre secret</strong> avant de lancer.<br><br>
+          Quand le joueur principal arrive, clique sur le bouton.</p>
+        </div>
+        <div style="margin: 20px 0;">
+          <label style="color: rgba(255,255,255,0.7); font-family: var(--mono); font-size: 0.85rem; display: block; margin-bottom: 8px;">Prénom du joueur :</label>
+          <input type="text" class="text-input" id="input-player-name" style="max-width: 300px; margin: 0 auto;" placeholder="Bastien" value="Bastien" oninput="updatePlayerName(this.value)">
+        </div>
+        <button class="btn pulse-glow green" style="margin-top: 20px; font-size: 1.2rem;" id="btn-start-game" onclick="launchIntro()">
+          ▶ BASTIEN, À TOI DE JOUER !
+        </button>
+        <div class="setup-nav" style="justify-content: center;">
+          <button class="btn small" onclick="goToStep2()">← MODIFIER LES QUESTIONS</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ÉCRAN CINÉMATIQUE D'INTRO ============ -->
+<div class="screen" id="screen-cinematic">
+  <button class="cine-skip" onclick="skipCinematic()">PASSER L'INTRO →</button>
+  <video class="cine-video" id="cine-video" muted playsinline preload="auto"></video>
+  <div class="cine-overlay"></div>
+  <div class="cine-container">
+    <div class="cine-chapter" id="cine-chapter"></div>
+    <div class="cine-text" id="cine-text"></div>
+    <div class="cine-controls">
+      <button class="btn green cine-start-btn" id="cine-start-btn" onclick="startGame()">▶ COMMENCER L'OPÉRATION</button>
+    </div>
+  </div>
+  <div class="cine-voice-controls">
+    <button class="cine-voice-btn" id="cine-replay-btn" onclick="replayCinematic()">⟲ REJOUER</button>
+    <button class="cine-voice-btn" id="cine-mute-btn" onclick="toggleVoice()">🔊 VOIX</button>
+    <button class="cine-voice-btn" id="cine-music-btn" onclick="toggleMusic()">🎵 MUSIQUE</button>
+  </div>
+</div>
+
+<!-- ============ ÉCRAN INTRO NIVEAU ============ -->
+<div class="screen" id="screen-level-intro">
+  <div class="level-intro">
+    <div class="level-num" id="li-num">// CADENAS 01 //</div>
+    <div class="level-title" id="li-title">INITIALISATION</div>
+    <div class="level-desc" id="li-desc"></div>
+    <div class="progress-dots" id="li-dots"></div>
+    <div class="loading-bar"><div class="loading-bar-fill" id="li-bar"></div></div>
+    <div style="font-family:var(--mono); color:var(--neon-pink); letter-spacing:0.2em; font-size:0.8rem;" id="li-status">CHARGEMENT...</div>
+  </div>
+</div>
+
+<!-- ============ ÉCRAN PROGRESSION CADENAS ============ -->
+<div class="screen" id="screen-lock-progress">
+  <h2 class="verify-title" id="lp-title">CADENAS 01</h2>
+  <p class="subtitle" id="lp-subtitle" style="margin-bottom: 30px;">// DÉBLOQUE LES 3 CHIFFRES //</p>
+  <div class="lock-progress" id="lp-slots"></div>
+  <p style="font-family: var(--mono); color: rgba(255,255,255,0.7); margin: 20px auto; max-width: 500px; text-align: center; line-height: 1.6;" id="lp-message">
+    Réponds aux <strong style="color:var(--neon-cyan)">3 questions</strong> pour débloquer le prochain chiffre.
+  </p>
+  <button class="btn pulse-glow" style="margin-top: 20px;" id="lp-btn" onclick="startNextDigit()">▶ DÉBLOQUER LE CHIFFRE</button>
+</div>
+
+<!-- ============ ÉCRAN QUESTION ============ -->
+<div class="screen" id="screen-question">
+  <div class="q-timer-container" id="q-timer-container">
+    <svg class="q-timer-svg" viewBox="0 0 100 100">
+      <circle class="q-timer-bg" cx="50" cy="50" r="45" />
+      <circle class="q-timer-ring" id="q-timer-ring" cx="50" cy="50" r="45" />
+    </svg>
+    <span class="q-timer-text" id="q-timer-text">30</span>
+  </div>
+  <div class="q-mini-progress" id="q-mini-progress"></div>
+  <div class="q-counter" id="q-counter">QUESTION 1/3</div>
+  <div class="q-text" id="q-text">Question ici</div>
+  <div class="guests-grid" id="guests-grid"></div>
+</div>
+
+<!-- ============ ÉCRAN VÉRIFICATION ============ -->
+<div class="screen" id="screen-verify">
+  <div class="verify-title" id="verify-title">VÉRIFICATION</div>
+  <div class="q-recap" id="q-recap"></div>
+  <div class="verify-message" id="verify-message"></div>
+  <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
+    <button class="btn green" id="btn-verify" onclick="verifyAnswers()">VÉRIFIER MES RÉPONSES</button>
+  </div>
+</div>
+
+<!-- ============ ÉCRAN VICTOIRE ============ -->
+<div class="screen" id="screen-victory">
+  <div class="subtitle" style="color:var(--neon-green);">// MISSION ACCOMPLIE //</div>
+  <h1 class="victory-title">JOYEUX<br>ANNIVERSAIRE</h1>
+  <div class="victory-message" id="victory-message"></div>
+  <button class="btn pink" onclick="location.reload()">⟲ NOUVELLE PARTIE</button>
+</div>
+
+<!-- ============ ÉCRAN OUVERTURE CADENAS (SLOT MACHINE) ============ -->
+<div class="screen" id="screen-unlock">
+  <h2 class="unlock-title" id="unlock-title">DÉVERROUILLAGE...</h2>
+  <div class="slot-display" id="slot-display"></div>
+  <div class="unlock-status" id="unlock-status">// SYNCHRONISATION DES CYLINDRES //</div>
+  <div class="unlock-message" id="unlock-message">🔓 CADENAS OUVERT</div>
+  <div class="unlock-reward" id="unlock-reward">Va récupérer ta récompense !</div>
+  <button class="btn green unlock-btn" id="unlock-btn" onclick="nextCadenas()">CADENAS SUIVANT →</button>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<script>
+/* =========================================================
+   🧪 MODE TEST — METTRE À FALSE AVANT LE VRAI JEU !
+   =========================================================
+   true  = pré-remplit 4 joueurs + assigne toutes les bonnes réponses
+           + surligne en JAUNE la bonne réponse pendant le jeu
+   false = configuration manuelle normale, pas de triche
+*/
+const TEST_MODE = true;
+
+/* =========================================================
+   🎮 CONFIGURATION DES QUESTIONS (VRAIES DONNÉES)
+   Cadenas 1-3 : "Qui parmi nous" (2 questions/chiffre × 3 chiffres = 18)
+   Cadenas 4 : QCM "Connais-tu Bastien ?" (4 questions/chiffre × 3 chiffres = 12)
+   Total = 30 questions
+   ========================================================= */
+
+/* Nombre de chiffres par cadenas */
+const DIGITS_PER_CADENAS = 3;
+
+/* =========================================================
+   POOL DE QUESTIONS "Qui parmi nous" (cadenas 1-2-3)
+   Toutes les questions fournies. Elles sont distribuées
+   automatiquement dans les 9 chiffres (3 cadenas × 3 chiffres).
+   Ta soeur peut en ajouter/supprimer pendant le setup.
+   ========================================================= */
+const ALL_QUI_QUESTIONS = [
+  { text: "Qui fait le plus de neutrale ?", answer: "Benj" },
+  { text: "Qui parle au plus de zouz différentes sur Instagram ?", answer: "Guillaume" },
+  { text: "Lequel de tes amis te parle le plus de son travail ?", answer: "Thomas" },
+  { text: "Qui est la personne qui te stresse le plus quand on joue au jeu de société ?", answer: "Marine" },
+  { text: "Qui pourrait devenir fou si vous étiez coincés dans un ascenseur ?", answer: "Marine" },
+  { text: "Qui sélectionnerais-tu pour ton équipe de hand ?", answer: "Cedrine" },
+  { text: "Qui fait les meilleurs créneaux ?", answer: "Meghan" },
+  { text: "À qui voudrais-tu ressembler quand tu seras plus vieux ?", answer: "Serge" },
+  { text: "Qui est la personne qui a le plus peur quand il prend l'avion ?", answer: "Serge" },
+  { text: "Qui irais-tu voir en premier si tu t'ouvres le gros orteil ?", answer: "Christine" },
+  { text: "Chez qui pourrais-tu lécher le sol sans problème ?", answer: "Christine" },
+  { text: "Qui dit cette phrase « ahhh tu crois toi » ?", answer: "Raymond" },
+  { text: "Chez qui irais-tu en cas de fin du monde ?", answer: "Raymond" },
+  { text: "Qui est le plus ULTRA supporter de l'OM ?", answer: "Alex" },
+  { text: "Qui serait le plus susceptible de t'aider en cas de « tétine de Zac cassée ou perdue » ?", answer: "Alex" },
+  { text: "Qui ne voudrais-tu pas voir arriver chez toi quand il travaille ?", answer: "Victoria" },
+  { text: "Qui est la personne que tu connais qui met le moins souvent des chaussures ?", answer: "Hanna" },
+  { text: "Qui pourrait te battre au 200m 4 nages ?", answer: "Maud" },
+  { text: "Qui est la personne qui t'a permis de déroger aux règles alimentaires de tes parents pendant ton enfance ?", answer: "Anthony" },
+  { text: "Qui est la personne la plus sensible aux hormones que tu connaisses ?", answer: "Claire" },
+  { text: "Qui est le plus grand joueur français ?", answer: "Eliott" },
+  { text: "Qui est ton maître au ping-pong ?", answer: "Eliott" },
+  { text: "Pour qui tu te réveilles le plus tôt le matin ?", answer: "Zac" },
+  { text: "Qui est la personne à qui tu renifles le plus les pieds ?", answer: "Zac" },
+  { text: "Avec qui tu partirais faire une brocante à 7h du mat avec Zac ?", answer: "Simon" },
+  { text: "Lequel de vos amis ta femme admire le plus ?", answer: "Pauline" },
+  { text: "Qui est la personne la plus susceptible avec qui tu en joues le plus ?", answer: "Nini" }
+];
+
+/* Distribue N questions dans 9 chiffres (3 cadenas × 3 chiffres) de façon équilibrée */
+function distributeQuestions(questions) {
+  const totalSlots = DIGITS_PER_CADENAS * 3; // 9 chiffres pour cadenas 1-2-3
+  const result = [];
+  for (let i = 0; i < totalSlots; i++) result.push([]);
+  questions.forEach((q, i) => {
+    result[i % totalSlots].push(q.text);
+  });
+  return result;
+}
+
+/* Construit les NIVEAUX à partir du pool de questions */
+function buildNiveaux() {
+  const distributed = distributeQuestions(ALL_QUI_QUESTIONS);
+  const titres = [
+    { titre: "ACCÈS AU SERVEUR", desc: "Premier cadenas. 3 chiffres à débloquer pour franchir la porte." },
+    { titre: "ZONE DE COMBAT", desc: "Le système se durcit. 3 nouveaux chiffres à arracher." },
+    { titre: "PROTOCOLE INTIME", desc: "Questions plus personnelles. Choisis avec soin." }
+  ];
+  const niveaux = titres.map((t, ni) => ({
+    titre: t.titre,
+    desc: t.desc,
+    type: "qui",
+    chiffres: [0, 1, 2].map(ci => ({
+      questions: distributed[ni * DIGITS_PER_CADENAS + ci]
+    }))
+  }));
+  // Cadenas 4 : QCM
+  niveaux.push({
+    titre: "COFFRE FINAL",
+    desc: "Dernier verrou. Le trésor est à portée de main.",
+    type: "qcm",
+    introText: "Pour cette dernière épreuve, ce n'est pas toi qui vas être maître de ton destin… mais les personnes que tu as choisies pour être présentes ce soir ! J'espère que tu leur fais confiance !!",
+    chiffres: [
+      { questions: [
+        { text: "Quelle taille fait Bastien ?", choices: ["1,89 m", "1,90 m", "1,88 m", "1,91 m"] },
+        { text: "Sa raquette de padel actuelle ?", choices: ["Head Cuelo", "Bullpadel Hack", "Nox AT10", "Adidas Metalbone"] },
+        { text: "Qu'est-ce qui pourrait à 100% faire bondir Bastien de sa chaise ?", choices: ["Un margouillat qui tombe sur lui", "Un but du PSG", "Un cafard qui se pose sur lui", "Zac qui tombe"] },
+        { text: "Qui est le premier amour de sa vie à avoir dormi avec lui dans son lit ?", choices: ["Son chien", "Son fils", "Sa femme", "Son chat"] }
+      ]},
+      { questions: [
+        { text: "Pour quelle raison appellerais-tu Bastien s'il devait t'aider ?", choices: ["Un déménagement", "Recoudre un rideau", "Faire le jardin", "Ranger ta maison"] },
+        { text: "Bastien aimerait-il plus (le Bastien d'aujourd'hui) :", choices: ["Dormir", "Voyager", "Aller courir", "Aller à la plage"] },
+        { text: "Bastien est plutôt :", choices: ["Patient", "Impulsif", "Timide", "Spontané"] },
+        { text: "Quels travaux Bastien a-t-il faits à la maison ces derniers temps ?", choices: ["Aucun", "Le caillebotis", "Les toilettes", "La chambre"] }
+      ]},
+      { questions: [
+        { text: "Quelle taille de t-shirt Bastien fait-il ?", choices: ["M", "L", "XL", "XXL"] },
+        { text: "Quelle est la particularité de Bastien ?", choices: ["Une jambe plus courte", "Une déformation du dos", "Des dents en moins", "Une pilosité anormale"] },
+        { text: "Bastien joue à quoi comme jeu vidéo en ce moment ?", choices: ["Mario Kart", "FIFA", "Dofus", "LoL"] },
+        { text: "Dans une journée Bastien mange combien de fois ?", choices: ["1", "3", "4", "5"] }
+      ]}
+    ]
+  });
+  return niveaux;
+}
+
+const NIVEAUX = buildNiveaux();
+
+/* Helpers */
+function getQuestionText(ni, ci, qi) {
+  const q = NIVEAUX[ni].chiffres[ci].questions[qi];
+  return typeof q === 'string' ? q : q.text;
+}
+function getQuestionsCount(ni, ci) {
+  return NIVEAUX[ni].chiffres[ci].questions.length;
+}
+function isQCM(ni) {
+  return NIVEAUX[ni].type === 'qcm';
+}
+
+/* Map texte question → nom de la bonne réponse (pour pré-assignation) */
+const ANSWER_MAP = {};
+ALL_QUI_QUESTIONS.forEach(q => { ANSWER_MAP[q.text] = q.answer; });
+
+const AVATARS_DEFAULT = ["🦊","🐼","🐺","🦁","🐯","🐸","🦄","🐙","🦉","🐧","🐨","🦖","🦝","🐰","🐶","🐱"];
+
+/* =========================================================
+   🧠 ÉTAT
+   ========================================================= */
+
+let players = [];
+// assignments[`${niveau}-${chiffre}`] = { bonneReponseId: "p_xxx", leurres: ["p_yyy", "p_zzz", "p_www"] }
+let assignments = {};
+let playerName = "Bastien";
+
+let gameState = {
+  niveau: 0,        // 0 à 3
+  chiffre: 0,       // 0 à 2 (chiffre courant à débloquer)
+  question: 0,      // question courante (dynamique selon type)
+  reponses: [],     // pour le chiffre en cours : [{playerId, chiffre}] ou [{choiceIndex, choiceText}]
+  unlockedDigits: [], // pour le cadenas en cours : tableau de chiffres déjà débloqués
+  editingSlot: null,
+  timerInterval: null,
+  timerSeconds: 30
+};
+
+/* =========================================================
+   🔊 AUDIO (Web Audio)
+   ========================================================= */
+
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function beep(freq, duration, type = "sine", volume = 0.15) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    osc.connect(gain); gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+function sndClick() { beep(880, 0.05, "square", 0.08); }
+function sndSelect() { beep(660, 0.1, "sine", 0.12); setTimeout(()=>beep(880, 0.1, "sine", 0.1), 60); }
+function sndDenied() {
+  beep(180, 0.2, "sawtooth", 0.2);
+  setTimeout(()=>beep(120, 0.4, "sawtooth", 0.2), 150);
+}
+function sndUnlockDigit() {
+  beep(523, 0.08, "sine", 0.15);
+  setTimeout(()=>beep(784, 0.15, "sine", 0.15), 80);
+  setTimeout(()=>beep(1047, 0.25, "sine", 0.18), 200);
+}
+function sndGranted() {
+  beep(523, 0.1, "sine", 0.15);
+  setTimeout(()=>beep(659, 0.1, "sine", 0.15), 100);
+  setTimeout(()=>beep(784, 0.1, "sine", 0.15), 200);
+  setTimeout(()=>beep(1047, 0.3, "sine", 0.2), 300);
+}
+function sndVictory() {
+  const notes = [523, 659, 784, 1047, 1319];
+  notes.forEach((f, i) => setTimeout(()=>beep(f, 0.2, "triangle", 0.18), i*120));
+  setTimeout(()=>{
+    beep(1047, 0.4, "triangle", 0.2);
+    beep(1319, 0.4, "triangle", 0.15);
+    beep(1568, 0.6, "triangle", 0.15);
+  }, 700);
+}
+function sndType() { beep(2000 + Math.random()*500, 0.03, "square", 0.05); }
+function sndTick() { beep(1200, 0.04, "square", 0.1); }
+function sndTimeUp() {
+  beep(300, 0.15, "sawtooth", 0.2);
+  setTimeout(()=>beep(200, 0.3, "sawtooth", 0.2), 100);
+  setTimeout(()=>beep(150, 0.4, "sawtooth", 0.15), 250);
+}
+
+/* =========================================================
+   ⏱️ TIMER 30 SECONDES
+   ========================================================= */
+const TIMER_DURATION = 30;
+const TIMER_CIRCUMFERENCE = 2 * Math.PI * 45; // 283
+
+function startTimer() {
+  stopTimer();
+  gameState.timerSeconds = TIMER_DURATION;
+  const ring = document.getElementById("q-timer-ring");
+  const text = document.getElementById("q-timer-text");
+  const container = document.getElementById("q-timer-container");
+  if (!ring || !text) return;
+  ring.style.strokeDashoffset = "0";
+  ring.classList.remove("urgent");
+  text.classList.remove("urgent");
+  text.textContent = TIMER_DURATION;
+  container.style.display = "block";
+
+  gameState.timerInterval = setInterval(() => {
+    gameState.timerSeconds--;
+    const remaining = gameState.timerSeconds;
+    text.textContent = remaining;
+    const progress = 1 - (remaining / TIMER_DURATION);
+    ring.style.strokeDashoffset = (progress * TIMER_CIRCUMFERENCE).toFixed(1);
+
+    if (remaining <= 10 && remaining > 0) {
+      ring.classList.add("urgent");
+      text.classList.add("urgent");
+      sndTick();
+    }
+    if (remaining <= 0) {
+      stopTimer();
+      sndTimeUp();
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (gameState.timerInterval) {
+    clearInterval(gameState.timerInterval);
+    gameState.timerInterval = null;
+  }
+}
+
+function handleTimeout() {
+  // Timeout = mauvaise réponse (on enregistre une réponse vide)
+  const niv = NIVEAUX[gameState.niveau];
+  const isQcm = isQCM(gameState.niveau);
+
+  // Désactiver les cartes
+  document.querySelectorAll(".guest-card, .qcm-card").forEach(c => c.style.pointerEvents = "none");
+
+  // Flash rouge rapide
+  const flash = document.getElementById("flash");
+  flash.textContent = "TEMPS ÉCOULÉ";
+  flash.className = "flash denied active";
+  setTimeout(() => flash.className = "flash", 1200);
+
+  setTimeout(() => {
+    if (gameState.editingSlot !== null) {
+      // En mode correction : remettre une mauvaise réponse
+      gameState.reponses[gameState.editingSlot] = isQcm
+        ? { choiceIndex: -1, choiceText: "Pas de réponse" }
+        : { playerId: "__timeout__", chiffre: -1 };
+      gameState.editingSlot = null;
+      showVerify();
+    } else {
+      gameState.reponses.push(isQcm
+        ? { choiceIndex: -1, choiceText: "Pas de réponse" }
+        : { playerId: "__timeout__", chiffre: -1 });
+      gameState.question++;
+      const totalQ = getQuestionsCount(gameState.niveau, gameState.chiffre);
+      if (gameState.question < totalQ) {
+        showQuestion();
+      } else {
+        showVerify();
+      }
+    }
+  }, 1400);
+}
+
+/* =========================================================
+   🎵 MUSIQUE D'AMBIANCE CINÉMATIQUE (générée en Web Audio)
+   ========================================================= */
+
+let ambientState = {
+  playing: false,
+  nodes: [],
+  intervalIds: []
+};
+
+function startAmbientMusic() {
+  if (ambientState.playing) return;
+  const ctx = getAudio();
+  ambientState.playing = true;
+  ambientState.nodes = [];
+  ambientState.intervalIds = [];
+
+  // Master gain (volume global de la musique)
+  const masterGain = ctx.createGain();
+  masterGain.gain.value = 0.0;
+  masterGain.connect(ctx.destination);
+  // Fade in
+  masterGain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 2.5);
+
+  ambientState.masterGain = masterGain;
+
+  // ---- 1) Drone grave continu (bourdon de tension) ----
+  const drone1 = ctx.createOscillator();
+  drone1.type = "sine";
+  drone1.frequency.value = 55; // La grave
+  const drone1Gain = ctx.createGain();
+  drone1Gain.gain.value = 0.5;
+  drone1.connect(drone1Gain); drone1Gain.connect(masterGain);
+  drone1.start();
+
+  const drone2 = ctx.createOscillator();
+  drone2.type = "sawtooth";
+  drone2.frequency.value = 82.4; // Mi
+  const drone2Gain = ctx.createGain();
+  drone2Gain.gain.value = 0.08;
+  // Filtre passe-bas pour adoucir
+  const drone2Filter = ctx.createBiquadFilter();
+  drone2Filter.type = "lowpass";
+  drone2Filter.frequency.value = 400;
+  drone2.connect(drone2Filter); drone2Filter.connect(drone2Gain); drone2Gain.connect(masterGain);
+  drone2.start();
+
+  ambientState.nodes.push(drone1, drone2);
+
+  // ---- 2) Pulsations rythmiques (cœur qui bat / suspense) ----
+  const pulseInterval = setInterval(() => {
+    if (!ambientState.playing) return;
+    const now = ctx.currentTime;
+    const pulse = ctx.createOscillator();
+    pulse.type = "sine";
+    pulse.frequency.value = 60;
+    const pulseGain = ctx.createGain();
+    pulseGain.gain.setValueAtTime(0, now);
+    pulseGain.gain.linearRampToValueAtTime(0.25, now + 0.05);
+    pulseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    pulse.connect(pulseGain); pulseGain.connect(masterGain);
+    pulse.start(now);
+    pulse.stop(now + 0.7);
+  }, 1200); // toutes les 1.2s
+  ambientState.intervalIds.push(pulseInterval);
+
+  // ---- 3) Mélodie atmosphérique aléatoire (notes éparses) ----
+  // Gamme mineure mystérieuse (la mineur harmonique)
+  const notes = [220, 261.63, 293.66, 329.63, 392, 440, 523.25, 587.33];
+
+  const melodyInterval = setInterval(() => {
+    if (!ambientState.playing) return;
+    // 70% de chance de jouer une note
+    if (Math.random() > 0.3) {
+      const now = ctx.currentTime;
+      const freq = notes[Math.floor(Math.random() * notes.length)];
+      const osc = ctx.createOscillator();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+
+      const noteGain = ctx.createGain();
+      noteGain.gain.setValueAtTime(0, now);
+      noteGain.gain.linearRampToValueAtTime(0.06, now + 0.3);
+      noteGain.gain.exponentialRampToValueAtTime(0.001, now + 3.5);
+
+      // Filtre pour rendre la note plus douce / mystérieuse
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = 1500;
+
+      osc.connect(filter); filter.connect(noteGain); noteGain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + 4);
+    }
+  }, 2200);
+  ambientState.intervalIds.push(melodyInterval);
+
+  // ---- 4) Hauteur "souffle" — bruit blanc filtré subtil ----
+  // Buffer de bruit blanc
+  const bufferSize = ctx.sampleRate * 2;
+  const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const noiseData = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    noiseData[i] = (Math.random() * 2 - 1) * 0.5;
+  }
+  const noise = ctx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+  const noiseFilter = ctx.createBiquadFilter();
+  noiseFilter.type = "bandpass";
+  noiseFilter.frequency.value = 800;
+  noiseFilter.Q.value = 0.5;
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.value = 0.025;
+  noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(masterGain);
+  noise.start();
+  ambientState.nodes.push(noise);
+}
+
+function stopAmbientMusic(fadeMs = 1500) {
+  if (!ambientState.playing) return;
+  const ctx = getAudio();
+  if (ambientState.masterGain) {
+    ambientState.masterGain.gain.linearRampToValueAtTime(0, ctx.currentTime + fadeMs / 1000);
+  }
+  setTimeout(() => {
+    ambientState.nodes.forEach(n => { try { n.stop(); } catch(e) {} });
+    ambientState.intervalIds.forEach(id => clearInterval(id));
+    ambientState.nodes = [];
+    ambientState.intervalIds = [];
+    ambientState.playing = false;
+  }, fadeMs + 100);
+}
+
+function setAmbientVolume(vol) {
+  if (ambientState.masterGain) {
+    const ctx = getAudio();
+    ambientState.masterGain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.3);
+  }
+}
+
+/* =========================================================
+   🧭 NAVIGATION
+   ========================================================= */
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0, 0);
+
+  // Gestion du bouton retour selon l'écran
+  const backBtn = document.getElementById("back-btn");
+  const screensWithBack = ["screen-level-intro", "screen-lock-progress", "screen-question", "screen-verify", "screen-unlock"];
+  if (screensWithBack.includes(id)) {
+    backBtn.classList.remove("hidden");
+  } else {
+    backBtn.classList.add("hidden");
+  }
+}
+
+function goBack() {
+  const currentScreen = document.querySelector(".screen.active");
+  if (!currentScreen) return;
+
+  // Adapter le message selon l'écran
+  const text = document.getElementById("confirm-modal-text");
+  if (currentScreen.id === "screen-question" || currentScreen.id === "screen-verify") {
+    text.textContent = "Tu vas perdre la progression du chiffre en cours. Continuer ?";
+  } else if (currentScreen.id === "screen-lock-progress") {
+    text.textContent = "Tu vas perdre tous les chiffres débloqués sur ce cadenas. Continuer ?";
+  } else if (currentScreen.id === "screen-unlock") {
+    text.textContent = "Tu vas quitter le jeu et revenir à l'accueil. Continuer ?";
+  } else {
+    text.textContent = "Tu vas revenir à l'accueil. Continuer ?";
+  }
+
+  document.getElementById("confirm-modal").classList.add("active");
+}
+
+function closeConfirmModal() {
+  sndClick();
+  document.getElementById("confirm-modal").classList.remove("active");
+}
+
+function confirmGoBack() {
+  sndClick();
+  stopTimer();
+  document.getElementById("confirm-modal").classList.remove("active");
+
+  const currentScreen = document.querySelector(".screen.active");
+  if (!currentScreen) return;
+
+  switch (currentScreen.id) {
+    case "screen-question":
+    case "screen-verify":
+      gameState.reponses = [];
+      gameState.question = 0;
+      gameState.editingSlot = null;
+      showLockProgress();
+      break;
+    case "screen-lock-progress":
+      gameState.chiffre = 0;
+      gameState.unlockedDigits = [];
+      showLevelIntro();
+      break;
+    case "screen-unlock":
+      document.getElementById("hud").classList.remove("active");
+      goWelcome();
+      break;
+    case "screen-level-intro":
+      document.getElementById("hud").classList.remove("active");
+      goWelcome();
+      break;
+  }
+}
+
+function goWelcome() { showScreen("screen-welcome"); }
+function goSetup() {
+  showScreen("screen-setup");
+  if (players.length === 0) {
+    for (let i = 0; i < 4; i++) addPlayer();
+  }
+  renderPlayers();
+}
+
+function updatePlayerName(v) {
+  playerName = v.trim() || "Bastien";
+  document.getElementById("btn-start-game").textContent = `▶ ${playerName.toUpperCase()}, À TOI DE JOUER !`;
+}
+
+async function launchIntro() {
+  sndSelect();
+  getAudio();
+  // Charger les voix (peut être asynchrone)
+  if ("speechSynthesis" in window) {
+    await loadVoices();
+  }
+  startCinematic();
+}
+
+/* =========================================================
+   ⚙️ ÉTAPE 1 : JOUEURS
+   ========================================================= */
+
+function addPlayer() {
+  const id = "p_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+  players.push({
+    id,
+    nom: "",
+    avatar: AVATARS_DEFAULT[players.length % AVATARS_DEFAULT.length]
+    // Le chiffre sera assigné automatiquement au démarrage du jeu (effet escape game)
+  });
+  renderPlayers();
+}
+
+function removePlayer(id) {
+  players = players.filter(p => p.id !== id);
+  // Nettoyer les assignations qui pointaient sur ce joueur
+  Object.keys(assignments).forEach(k => {
+    const a = assignments[k];
+    if (a && a.bonneReponseId === id) a.bonneReponseId = "";
+  });
+  renderPlayers();
+}
+
+function updatePName(id, val) {
+  const p = players.find(p => p.id === id);
+  if (p) p.nom = val;
+}
+
+function handleAvatarUpload(id, fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const p = players.find(p => p.id === id);
+    if (p) {
+      p.avatar = e.target.result;
+      renderPlayers();
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderAvatar(player) {
+  if (player.avatar && player.avatar.startsWith("data:")) {
+    return `<img src="${player.avatar}" alt="${escapeHtml(player.nom)}">`;
+  }
+  return `<span>${player.avatar || "👤"}</span>`;
+}
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+function renderPlayers() {
+  const html = players.map(p => `
+    <div class="player-form">
+      <label class="avatar-preview" title="Cliquer pour changer la photo">
+        ${renderAvatar(p)}
+        <span class="change-hint">PHOTO</span>
+        <input type="file" accept="image/*" onchange="handleAvatarUpload('${p.id}', this)">
+      </label>
+      <input type="text" class="text-input" placeholder="Prénom du joueur"
+             value="${escapeHtml(p.nom)}"
+             oninput="updatePName('${p.id}', this.value)">
+      <button class="btn-remove" onclick="removePlayer('${p.id}')">✕</button>
+    </div>
+  `).join("");
+  document.getElementById("players-list").innerHTML = html;
+}
+
+function goToStep1() {
+  document.querySelectorAll(".setup-step").forEach(s => s.classList.remove("active"));
+  document.getElementById("step-players").classList.add("active");
+  document.getElementById("dot-1").className = "step-dot active";
+  document.getElementById("dot-2").className = "step-dot";
+  document.getElementById("dot-3").className = "step-dot";
+}
+
+function goToStep2() {
+  const err = document.getElementById("error-players");
+  err.classList.remove("active");
+
+  if (players.length < 4) {
+    err.textContent = "⚠ Il faut au moins 4 joueurs (pour avoir 4 propositions par question).";
+    err.classList.add("active");
+    return;
+  }
+  const noms = players.map(p => p.nom.trim());
+  if (noms.some(n => !n)) {
+    err.textContent = "⚠ Tous les joueurs doivent avoir un prénom.";
+    err.classList.add("active");
+    return;
+  }
+
+  // Initialiser assignments par question (seulement pour type "qui")
+  NIVEAUX.forEach((niv, ni) => {
+    if (niv.type === 'qcm') return;
+    niv.chiffres.forEach((ch, ci) => {
+      ch.questions.forEach((_, qi) => {
+        const key = `${ni}-${ci}-${qi}`;
+        if (!assignments[key]) {
+          assignments[key] = { bonneReponseId: "" };
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll(".setup-step").forEach(s => s.classList.remove("active"));
+  document.getElementById("step-answers").classList.add("active");
+  document.getElementById("dot-1").className = "step-dot done";
+  document.getElementById("dot-2").className = "step-dot active";
+  document.getElementById("dot-3").className = "step-dot";
+  renderAnswers();
+}
+
+function renderAnswers() {
+  // Compter le total de questions
+  let totalQ = 0;
+  NIVEAUX.forEach(niv => niv.chiffres.forEach(ch => totalQ += ch.questions.length));
+
+  const html = NIVEAUX.map((niv, ni) => {
+    const qcm = niv.type === 'qcm';
+    let nivTotal = 0;
+    niv.chiffres.forEach(ch => nivTotal += ch.questions.length);
+    return `
+    <div class="cadenas-group" style="${qcm ? 'border-left-color: var(--neon-yellow);' : ''}">
+      <h3>${qcm ? '🎯' : '🔐'} Cadenas ${ni + 1} — ${niv.titre} ${qcm ? '(QCM)' : '(Qui parmi nous)'} <span class="q-count-badge">${nivTotal} Q</span></h3>
+      ${qcm ? `<p style="color:var(--neon-yellow); font-family:var(--mono); font-size:0.8rem; margin-bottom:14px; padding:8px; border:1px dashed rgba(255,230,0,0.4); background:rgba(255,230,0,0.05);">Les réponses correctes sont les premières de chaque liste. Elles seront mélangées automatiquement à l'affichage.</p>` : ''}
+      ${niv.chiffres.map((ch, ci) => {
+        return `
+          <div class="chiffre-group">
+            <h4>🔢 SÉRIE ${ci + 1}/${DIGITS_PER_CADENAS} DU CADENAS <span class="q-count-badge">${ch.questions.length} Q</span></h4>
+            ${ch.questions.map((q, qi) => {
+              const key = `${ni}-${ci}-${qi}`;
+              const canRemove = ch.questions.length > 1;
+              const removeBtn = canRemove ? `<button class="btn-remove-q" onclick="removeQuestion(${ni},${ci},${qi})" title="Supprimer cette question">✕ SUPPR</button>` : '';
+              if (qcm) {
+                const qObj = q;
+                return `
+                <div class="question-assign">
+                  <div class="q-label">QUESTION ${qi + 1}/${ch.questions.length} (QCM) ${removeBtn}</div>
+                  <textarea class="text-input" oninput="updateQuestionText(${ni}, ${ci}, ${qi}, this.value)">${escapeHtml(qObj.text)}</textarea>
+                  <div style="margin-top:8px;">
+                    ${qObj.choices.map((c, idx) => `
+                      <div style="display:flex; align-items:center; gap:6px; margin:4px 0;">
+                        <span style="color:${idx===0?'var(--neon-green)':'rgba(255,255,255,0.5)'}; font-family:var(--mono); font-size:0.7rem; min-width:70px;">${idx===0?'✓ CORRECT':'  Leurre '+(idx)}</span>
+                        <input type="text" class="text-input" value="${escapeHtml(c)}" style="font-size:0.85rem;" oninput="updateQCMChoice(${ni},${ci},${qi},${idx},this.value)">
+                      </div>
+                    `).join("")}
+                  </div>
+                </div>
+              `;
+              } else {
+                const a = assignments[key] || { bonneReponseId: "" };
+                return `
+                <div class="question-assign">
+                  <div class="q-label">QUESTION ${qi + 1}/${ch.questions.length} ${removeBtn}</div>
+                  <textarea class="text-input" oninput="updateQuestionText(${ni}, ${ci}, ${qi}, this.value)">${escapeHtml(q)}</textarea>
+                  <label style="display:block; margin-top:10px; font-family:var(--mono); font-size:0.7rem; color:var(--neon-pink); letter-spacing:0.2em;">BONNE RÉPONSE</label>
+                  <select class="select-input" onchange="setBonneReponseQ(${ni}, ${ci}, ${qi}, this.value)">
+                    <option value="">— Choisir le joueur —</option>
+                    ${players.map(p => `
+                      <option value="${p.id}" ${a.bonneReponseId === p.id ? 'selected' : ''}>
+                        ${escapeHtml(p.nom)}
+                      </option>
+                    `).join("")}
+                  </select>
+                </div>
+              `;
+              }
+            }).join("")}
+            <button class="btn-add-q" onclick="addQuestion(${ni},${ci})">+ AJOUTER UNE QUESTION</button>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;}).join("");
+
+  // Badge total
+  const totalBadge = `<p style="text-align:center; font-family:var(--mono); color:var(--neon-cyan); font-size:0.85rem; margin-bottom:16px; letter-spacing:0.1em;">TOTAL : <strong style="color:var(--neon-yellow);">${totalQ} questions</strong> sur ${NIVEAUX.length} cadenas</p>`;
+  document.getElementById("answers-list").innerHTML = totalBadge + html;
+}
+
+/* Ajouter / supprimer des questions dynamiquement */
+
+function addQuestion(ni, ci) {
+  sndClick();
+  const niv = NIVEAUX[ni];
+  if (niv.type === 'qcm') {
+    niv.chiffres[ci].questions.push({ text: "Nouvelle question QCM", choices: ["Bonne réponse", "Leurre 1", "Leurre 2", "Leurre 3"] });
+  } else {
+    niv.chiffres[ci].questions.push("Nouvelle question — à modifier");
+    // Créer l'assignment vide pour la nouvelle question
+    const qi = niv.chiffres[ci].questions.length - 1;
+    assignments[`${ni}-${ci}-${qi}`] = { bonneReponseId: "" };
+  }
+  renderAnswers();
+}
+
+function removeQuestion(ni, ci, qi) {
+  sndClick();
+  const niv = NIVEAUX[ni];
+  const ch = niv.chiffres[ci];
+  if (ch.questions.length <= 1) return; // garder au moins 1 question
+
+  ch.questions.splice(qi, 1);
+
+  // Réindexer les assignments pour ce chiffre (type "qui" seulement)
+  if (niv.type !== 'qcm') {
+    const newAssign = {};
+    ch.questions.forEach((_, newQi) => {
+      const oldQi = newQi >= qi ? newQi + 1 : newQi;
+      const oldKey = `${ni}-${ci}-${oldQi}`;
+      const newKey = `${ni}-${ci}-${newQi}`;
+      if (assignments[oldKey]) {
+        newAssign[newKey] = assignments[oldKey];
+      }
+    });
+    // Supprimer les anciennes clés de ce chiffre
+    Object.keys(assignments).forEach(k => {
+      if (k.startsWith(`${ni}-${ci}-`)) delete assignments[k];
+    });
+    // Remettre les nouvelles
+    Object.assign(assignments, newAssign);
+  }
+
+  renderAnswers();
+}
+
+function updateQCMChoice(ni, ci, qi, choiceIdx, val) {
+  NIVEAUX[ni].chiffres[ci].questions[qi].choices[choiceIdx] = val;
+}
+
+function setBonneReponseQ(ni, ci, qi, playerId) {
+  const key = `${ni}-${ci}-${qi}`;
+  if (!assignments[key]) assignments[key] = {};
+  assignments[key].bonneReponseId = playerId;
+}
+
+function updateQuestionText(ni, ci, qi, val) {
+  const q = NIVEAUX[ni].chiffres[ci].questions[qi];
+  if (typeof q === 'string') {
+    NIVEAUX[ni].chiffres[ci].questions[qi] = val;
+  } else {
+    q.text = val;
+  }
+}
+
+function goToStep3() {
+  const err = document.getElementById("error-answers");
+  err.classList.remove("active");
+
+  const missingList = [];
+  NIVEAUX.forEach((niv, ni) => {
+    if (niv.type === 'qcm') return; // QCM has built-in answers
+    niv.chiffres.forEach((ch, ci) => {
+      ch.questions.forEach((q, qi) => {
+        const a = assignments[`${ni}-${ci}-${qi}`];
+        if (!a || !a.bonneReponseId) {
+          const qText = typeof q === 'string' ? q : q.text;
+          missingList.push(`Cadenas ${ni+1}, Série ${ci+1}, Q${qi+1} : « ${qText} »`);
+        }
+      });
+    });
+  });
+  if (missingList.length > 0) {
+    err.innerHTML = `⚠ Il reste <strong>${missingList.length} question(s)</strong> sans bonne réponse attribuée :<ul style="text-align:left; margin:8px 0 0; padding-left:20px; font-size:0.8rem; line-height:1.6;">${missingList.map(m => `<li>${m}</li>`).join("")}</ul>`;
+    err.classList.add("active");
+    return;
+  }
+
+  document.querySelectorAll(".setup-step").forEach(s => s.classList.remove("active"));
+  document.getElementById("step-ready").classList.add("active");
+  document.getElementById("dot-1").className = "step-dot done";
+  document.getElementById("dot-2").className = "step-dot done";
+  document.getElementById("dot-3").className = "step-dot active";
+  updatePlayerName(document.getElementById("input-player-name").value);
+}
+
+/* =========================================================
+   🎮 JEU
+   ========================================================= */
+
+function startGame() {
+  sndSelect();
+  getAudio();
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  // Arrêter tout l'audio cinématique avec fade
+  stopCinematicAudio(1200);
+  // Arrêter la vidéo
+  const videoEl = document.getElementById("cine-video");
+  if (videoEl) {
+    videoEl.classList.remove("visible");
+    setTimeout(() => {
+      videoEl.pause();
+      videoEl.currentTime = 0;
+    }, 1500);
+  }
+  // Arrêter aussi la musique Web Audio générée si elle joue (fallback)
+  stopAmbientMusic(1200);
+  // Assigner un chiffre aléatoire (0-9) à chaque joueur pour l'effet "escape game"
+  // Plusieurs joueurs peuvent avoir le même chiffre, peu importe : la vérification se fait sur l'ID du joueur, pas sur le chiffre
+  players.forEach(p => {
+    p.chiffre = Math.floor(Math.random() * 10);
+  });
+  gameState.niveau = 0;
+  gameState.chiffre = 0;
+  document.getElementById("hud-player").textContent = playerName;
+  document.getElementById("hud").classList.add("active");
+  updateHUD();
+  showLevelIntro();
+}
+
+function updateHUD() {
+  document.getElementById("hud-lock").textContent = `${gameState.niveau + 1}/${NIVEAUX.length}`;
+  document.getElementById("hud-digit").textContent = `${gameState.chiffre + 1}/${DIGITS_PER_CADENAS}`;
+}
+
+function showLevelIntro() {
+  const niv = NIVEAUX[gameState.niveau];
+  document.getElementById("li-num").textContent = `// CADENAS ${String(gameState.niveau+1).padStart(2,'0')} //`;
+  document.getElementById("li-title").textContent = niv.titre;
+  document.getElementById("li-desc").textContent = niv.desc;
+
+  // Afficher le texte spécial QCM pour le cadenas 4
+  let specialEl = document.getElementById("li-special");
+  if (specialEl) specialEl.remove();
+  if (niv.introText) {
+    specialEl = document.createElement("div");
+    specialEl.id = "li-special";
+    specialEl.className = "level-intro-special";
+    specialEl.textContent = niv.introText;
+    document.getElementById("li-desc").after(specialEl);
+  }
+
+  const dotsHTML = NIVEAUX.map((_, i) => {
+    let cls = "dot";
+    if (i < gameState.niveau) cls += " done";
+    else if (i === gameState.niveau) cls += " current";
+    return `<div class="${cls}"></div>`;
+  }).join("");
+  document.getElementById("li-dots").innerHTML = dotsHTML;
+
+  const status = document.getElementById("li-status");
+  const messages = ["CONNEXION...", "DÉCRYPTAGE...", "CHARGEMENT MISSION...", "PRÊT."];
+  let msgIdx = 0;
+  status.textContent = messages[0];
+  showScreen("screen-level-intro");
+
+  const bar = document.getElementById("li-bar");
+  bar.style.width = "0%";
+  bar.style.transition = "width 2.5s ease";
+  setTimeout(()=> bar.style.width = "100%", 50);
+
+  const msgInterval = setInterval(()=>{
+    msgIdx++;
+    if (msgIdx < messages.length) {
+      status.textContent = messages[msgIdx];
+      sndType();
+    } else {
+      clearInterval(msgInterval);
+    }
+  }, 700);
+
+  setTimeout(()=>{
+    gameState.chiffre = 0;
+    gameState.unlockedDigits = [];
+    showLockProgress();
+  }, 2800);
+}
+
+function showLockProgress() {
+  const niv = NIVEAUX[gameState.niveau];
+  const qPerDigit = getQuestionsCount(gameState.niveau, Math.min(gameState.chiffre, niv.chiffres.length - 1));
+  document.getElementById("lp-title").textContent = `CADENAS ${gameState.niveau + 1} — ${niv.titre}`;
+  document.getElementById("lp-subtitle").textContent = `// CHIFFRE ${gameState.chiffre + 1} SUR ${DIGITS_PER_CADENAS} //`;
+
+  const slotsHTML = Array.from({length: DIGITS_PER_CADENAS}).map((_, i) => {
+    let cls = "lock-slot";
+    let val = "?";
+    if (i < gameState.unlockedDigits.length) {
+      cls += " unlocked";
+      val = gameState.unlockedDigits[i];
+    } else if (i === gameState.chiffre) {
+      cls += " current";
+    }
+    return `<div class="${cls}" id="slot-${i}">${val}</div>`;
+  }).join("");
+  document.getElementById("lp-slots").innerHTML = slotsHTML;
+
+  if (gameState.unlockedDigits.length === 0) {
+    document.getElementById("lp-message").innerHTML = `Réponds aux <strong style="color:var(--neon-cyan)">${qPerDigit} questions</strong> pour débloquer le <strong style="color:var(--neon-yellow)">1er chiffre</strong>.`;
+    document.getElementById("lp-btn").textContent = "▶ COMMENCER";
+  } else if (gameState.unlockedDigits.length < DIGITS_PER_CADENAS) {
+    document.getElementById("lp-message").innerHTML = `Bravo ! Continue pour débloquer le <strong style="color:var(--neon-yellow)">chiffre ${gameState.chiffre + 1}</strong>.`;
+    document.getElementById("lp-btn").textContent = "▶ CONTINUER";
+  }
+  showScreen("screen-lock-progress");
+}
+
+function startNextDigit() {
+  sndSelect();
+  gameState.question = 0;
+  gameState.reponses = [];
+  gameState.editingSlot = null;
+  updateHUD();
+  showQuestion();
+}
+
+function showQuestion() {
+  const niv = NIVEAUX[gameState.niveau];
+  const chData = niv.chiffres[gameState.chiffre];
+  const totalQ = chData.questions.length;
+  const qcm = isQCM(gameState.niveau);
+
+  let qIndex = gameState.question;
+  if (gameState.editingSlot !== null) {
+    qIndex = gameState.editingSlot;
+    document.getElementById("q-counter").textContent = `🔧 CORRECTION — QUESTION ${qIndex + 1}/${totalQ}`;
+  } else {
+    document.getElementById("q-counter").textContent = `QUESTION ${qIndex + 1}/${totalQ}`;
+  }
+
+  const qText = qcm ? chData.questions[qIndex].text : chData.questions[qIndex];
+  document.getElementById("q-text").textContent = qText;
+
+  // Mini progress dots
+  const miniHTML = Array.from({length: totalQ}).map((_, i) => {
+    let cls = "q-mini-dot";
+    if (gameState.editingSlot === null) {
+      if (i < gameState.question) cls += " done";
+      else if (i === gameState.question) cls += " current";
+    } else {
+      if (i === gameState.editingSlot) cls += " current";
+      else if (gameState.reponses[i]) cls += " done";
+    }
+    return `<div class="${cls}"></div>`;
+  }).join("");
+  document.getElementById("q-mini-progress").innerHTML = miniHTML;
+
+  const grid = document.getElementById("guests-grid");
+
+  if (qcm) {
+    // ========== MODE QCM ==========
+    grid.classList.add("qcm-mode");
+    const qData = chData.questions[qIndex];
+    // Mélanger les choix mais garder trace de l'index correct
+    const indices = qData.choices.map((c, i) => i);
+    const shuffled = indices.sort(() => Math.random() - 0.5);
+
+    grid.innerHTML = shuffled.map(origIdx => {
+      const isCorrect = origIdx === 0;
+      const testHighlight = TEST_MODE && isCorrect ? ' test-correct' : '';
+      const safeText = escapeHtml(qData.choices[origIdx]).replace(/'/g, "\\'");
+      return `
+        <div class="qcm-card${testHighlight}" onclick="chooseQCM(${origIdx}, '${safeText}', this)">
+          <span>${escapeHtml(qData.choices[origIdx])}</span>
+          ${TEST_MODE && isCorrect ? '<br><span style="font-family:var(--mono); font-size:0.6rem; color:var(--neon-yellow); letter-spacing:0.15em;">★ BONNE RÉPONSE</span>' : ''}
+        </div>
+      `;
+    }).join("");
+  } else {
+    // ========== MODE "QUI PARMI NOUS" ==========
+    grid.classList.remove("qcm-mode");
+    const key = `${gameState.niveau}-${gameState.chiffre}-${qIndex}`;
+    const a = assignments[key] || { bonneReponseId: "" };
+    const bonnePersonneId = a.bonneReponseId;
+
+    const leurresPossibles = players.filter(p => p.id !== bonnePersonneId);
+    const leurres = leurresPossibles.sort(() => Math.random() - 0.5).slice(0, 3);
+
+    const proposalIds = [bonnePersonneId, ...leurres.map(p => p.id)];
+    const proposals = proposalIds
+      .map(id => players.find(p => p.id === id))
+      .filter(Boolean)
+      .sort(() => Math.random() - 0.5);
+
+    grid.innerHTML = proposals.map(p => {
+      const isCorrect = p.id === bonnePersonneId;
+      const testHighlight = TEST_MODE && isCorrect ? ' test-correct' : '';
+      return `
+        <div class="guest-card${testHighlight}" onclick="chooseGuest('${p.id}', this)">
+          <div class="guest-avatar">${renderAvatar(p)}</div>
+          <span>${escapeHtml(p.nom)}</span>
+          ${TEST_MODE && isCorrect ? '<span style="font-family:var(--mono); font-size:0.6rem; color:var(--neon-yellow); letter-spacing:0.15em;">★ BONNE RÉPONSE</span>' : ''}
+        </div>
+      `;
+    }).join("");
+  }
+
+  showScreen("screen-question");
+  startTimer();
+}
+
+function chooseGuest(playerId, el) {
+  sndSelect();
+  stopTimer();
+  document.querySelectorAll(".guest-card").forEach(c => c.style.pointerEvents = "none");
+  el.classList.add("selected");
+
+  const player = players.find(p => p.id === playerId);
+  const totalQ = getQuestionsCount(gameState.niveau, gameState.chiffre);
+
+  setTimeout(()=>{
+    if (gameState.editingSlot !== null) {
+      gameState.reponses[gameState.editingSlot] = { playerId, chiffre: player.chiffre };
+      gameState.editingSlot = null;
+      showVerify();
+    } else {
+      gameState.reponses.push({ playerId, chiffre: player.chiffre });
+      gameState.question++;
+      if (gameState.question < totalQ) {
+        showQuestion();
+      } else {
+        showVerify();
+      }
+    }
+  }, 700);
+}
+
+function chooseQCM(choiceIndex, choiceText, el) {
+  sndSelect();
+  stopTimer();
+  document.querySelectorAll(".qcm-card").forEach(c => c.style.pointerEvents = "none");
+  el.classList.add("selected");
+
+  const totalQ = getQuestionsCount(gameState.niveau, gameState.chiffre);
+
+  setTimeout(()=>{
+    if (gameState.editingSlot !== null) {
+      gameState.reponses[gameState.editingSlot] = { choiceIndex, choiceText };
+      gameState.editingSlot = null;
+      showVerify();
+    } else {
+      gameState.reponses.push({ choiceIndex, choiceText });
+      gameState.question++;
+      if (gameState.question < totalQ) {
+        showQuestion();
+      } else {
+        showVerify();
+      }
+    }
+  }, 700);
+}
+
+/* =========================================================
+   🔍 VÉRIFICATION (3 questions du chiffre courant)
+   ========================================================= */
+
+function showVerify() {
+  const niv = NIVEAUX[gameState.niveau];
+  document.getElementById("verify-title").innerHTML = `CHIFFRE ${gameState.chiffre + 1} DU CADENAS ${gameState.niveau + 1}`;
+  document.getElementById("verify-message").textContent = "";
+  document.getElementById("verify-message").className = "verify-message";
+  document.getElementById("btn-verify").style.display = "inline-block";
+  renderRecap(false);
+  showScreen("screen-verify");
+}
+
+function renderRecap(checked) {
+  const qcm = isQCM(gameState.niveau);
+
+  const html = gameState.reponses.map((r, i) => {
+    let isCorrect, displayAvatar, displayName;
+
+    if (qcm) {
+      isCorrect = r.choiceIndex === 0; // index 0 = bonne réponse
+      displayAvatar = isCorrect ? "✓" : "✗";
+      displayName = r.choiceText || "Pas de réponse";
+    } else {
+      const p = players.find(p => p.id === r.playerId);
+      const key = `${gameState.niveau}-${gameState.chiffre}-${i}`;
+      const bonneId = assignments[key] ? assignments[key].bonneReponseId : null;
+      isCorrect = r.playerId === bonneId;
+      displayAvatar = p ? renderAvatar(p) : "?";
+      displayName = p ? escapeHtml(p.nom) : "Pas de réponse";
+    }
+
+    let cls = "q-recap-slot";
+    let onclick = "";
+    if (checked) {
+      if (isCorrect) cls += " correct";
+      else {
+        cls += " wrong";
+        onclick = `onclick="editSlot(${i})"`;
+      }
+    }
+    return `<div class="${cls}" ${onclick}>
+      <div class="q-recap-num">Q${i + 1}</div>
+      <div class="q-recap-avatar">${displayAvatar}</div>
+      <div class="q-recap-name" style="font-size:0.75rem;">${displayName}</div>
+    </div>`;
+  }).join("");
+  document.getElementById("q-recap").innerHTML = html;
+}
+
+function verifyAnswers() {
+  sndClick();
+  const qcm = isQCM(gameState.niveau);
+  let wrongCount = 0;
+
+  gameState.reponses.forEach((r, i) => {
+    if (qcm) {
+      if (r.choiceIndex !== 0) wrongCount++;
+    } else {
+      const key = `${gameState.niveau}-${gameState.chiffre}-${i}`;
+      const bonneId = assignments[key] ? assignments[key].bonneReponseId : null;
+      if (r.playerId !== bonneId) wrongCount++;
+    }
+  });
+  const allCorrect = wrongCount === 0;
+
+  renderRecap(true);
+
+  const msg = document.getElementById("verify-message");
+  const btnVerify = document.getElementById("btn-verify");
+
+  if (allCorrect) {
+    sndUnlockDigit();
+    let revealedDigit;
+    if (qcm) {
+      revealedDigit = Math.floor(Math.random() * 10);
+    } else {
+      const lastPlayer = players.find(p => p.id === gameState.reponses[gameState.reponses.length - 1].playerId);
+      revealedDigit = lastPlayer ? lastPlayer.chiffre : Math.floor(Math.random() * 10);
+    }
+    msg.className = "verify-message success";
+    msg.innerHTML = `✓ SÉRIE RÉUSSIE → CHIFFRE DÉBLOQUÉ : <strong style="font-size:1.5em">${revealedDigit}</strong>`;
+    btnVerify.style.display = "none";
+    gameState.unlockedDigits.push(revealedDigit);
+    setTimeout(()=>{
+      if (gameState.unlockedDigits.length >= DIGITS_PER_CADENAS) {
+        showCadenasComplete();
+      } else {
+        gameState.chiffre++;
+        showLockProgress();
+      }
+    }, 2200);
+  } else {
+    sndDenied();
+    msg.className = "verify-message error";
+    msg.innerHTML = `✗ ${wrongCount} mauvaise(s) réponse(s)<br>👉 Clique sur les cartes <span style="color:var(--neon-red)">ROUGES</span> pour corriger`;
+    btnVerify.style.display = "none";
+  }
+}
+
+function editSlot(index) {
+  sndClick();
+  gameState.editingSlot = index;
+  showQuestion();
+}
+
+function showCadenasComplete() {
+  // Animation slot machine : 3 cylindres qui défilent puis s'arrêtent un par un
+  const digits = gameState.unlockedDigits;
+  const cadenasNum = gameState.niveau + 1;
+
+  // Préparer l'écran
+  document.getElementById("unlock-title").textContent = `DÉVERROUILLAGE CADENAS ${cadenasNum}`;
+  document.getElementById("unlock-status").textContent = "// SYNCHRONISATION DES CYLINDRES //";
+  document.getElementById("unlock-message").classList.remove("visible");
+  document.getElementById("unlock-reward").classList.remove("visible");
+  document.getElementById("unlock-btn").classList.remove("visible");
+
+  // Construire les 4 cellules avec reels qui défilent
+  const slotHTML = digits.map((_, i) => `
+    <div class="slot-cell spinning" id="slot-cell-${i}">
+      <div class="slot-reel" id="slot-reel-${i}">
+        ${"0123456789012345".split("").join("<br>")}
+      </div>
+    </div>
+  `).join("");
+  document.getElementById("slot-display").innerHTML = slotHTML;
+
+  showScreen("screen-unlock");
+  sndType();
+
+  // Faire défiler puis bloquer les chiffres un par un
+  // Délais : 1er chiffre à 1.5s, puis +0.8s entre chaque
+  const baseDelay = 1500;
+  const stepDelay = 800;
+
+  digits.forEach((digit, i) => {
+    setTimeout(() => {
+      lockSlot(i, digit);
+      // Mettre à jour le message status
+      const status = document.getElementById("unlock-status");
+      if (i < digits.length - 1) {
+        status.textContent = `// ${i + 1}/${digits.length} CYLINDRES BLOQUÉS //`;
+      } else {
+        status.textContent = `// TOUS LES CYLINDRES SONT BLOQUÉS //`;
+      }
+    }, baseDelay + i * stepDelay);
+  });
+
+  // À la fin, révéler le message d'ouverture + bouton
+  const totalDuration = baseDelay + digits.length * stepDelay + 400;
+  setTimeout(() => {
+    sndGranted();
+    document.getElementById("unlock-message").textContent = `🔓 CADENAS ${cadenasNum} OUVERT !`;
+    document.getElementById("unlock-message").classList.add("visible");
+
+    // Message de récompense personnalisé selon le cadenas
+    const isLastCadenas = gameState.niveau >= NIVEAUX.length - 1;
+    const reward = document.getElementById("unlock-reward");
+    if (isLastCadenas) {
+      reward.innerHTML = `🎁 <strong>Va récupérer ta récompense finale !</strong><br>Le trésor t'attend...`;
+    } else if (gameState.niveau === 0) {
+      reward.innerHTML = `🎁 <strong>Va récupérer ta première récompense !</strong>`;
+    } else {
+      reward.innerHTML = `🎁 <strong>Va récupérer ta récompense n°${cadenasNum} !</strong>`;
+    }
+    reward.classList.add("visible");
+
+    // Bouton suivant
+    const btn = document.getElementById("unlock-btn");
+    if (isLastCadenas) {
+      btn.textContent = "▶ DÉCOUVRIR LE TRÉSOR FINAL";
+      btn.onclick = goToVictory;
+    } else {
+      btn.textContent = `▶ CADENAS ${cadenasNum + 1} →`;
+      btn.onclick = nextCadenas;
+    }
+    btn.classList.add("visible");
+  }, totalDuration);
+}
+
+function lockSlot(i, digit) {
+  sndUnlockDigit();
+  const cell = document.getElementById(`slot-cell-${i}`);
+  const reel = document.getElementById(`slot-reel-${i}`);
+  if (!cell || !reel) return;
+  // Stopper l'animation et afficher le bon chiffre
+  cell.classList.remove("spinning");
+  cell.classList.add("locked");
+  reel.style.animation = "none";
+  reel.style.transform = "translateY(0)";
+  reel.innerHTML = String(digit);
+}
+
+function nextCadenas() {
+  sndClick();
+  gameState.niveau++;
+  if (gameState.niveau >= NIVEAUX.length) {
+    showVictory();
+  } else {
+    updateHUD();
+    showLevelIntro();
+  }
+}
+
+function goToVictory() {
+  sndClick();
+  showVictory();
+}
+
+/* =========================================================
+   🎉 VICTOIRE
+   ========================================================= */
+
+function showVictory() {
+  document.getElementById("hud").classList.remove("active");
+  document.getElementById("victory-message").innerHTML = `
+    Bravo ${escapeHtml(playerName)} 🎂<br><br>
+    Tu as déjoué tous les pièges et débloqué le trésor !<br>
+    Tes amis ont quelque chose à te donner... 🎁
+  `;
+  showScreen("screen-victory");
+  sndVictory();
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const colors = ["#00ffe1", "#ff2bd6", "#39ff14", "#ffe600", "#ff2e4c"];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(()=>{
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.top = "-20px";
+      c.style.background = colors[Math.floor(Math.random()*colors.length)];
+      c.style.boxShadow = `0 0 8px ${c.style.background}`;
+      c.style.transform = `rotate(${Math.random()*360}deg)`;
+      const dur = 2 + Math.random()*2;
+      c.style.transition = `transform ${dur}s linear, top ${dur}s linear, opacity ${dur}s ease`;
+      document.body.appendChild(c);
+      requestAnimationFrame(()=>{
+        c.style.top = "110vh";
+        c.style.transform = `rotate(${Math.random()*1080}deg) translateX(${(Math.random()-0.5)*200}px)`;
+        c.style.opacity = "0";
+      });
+      setTimeout(()=> c.remove(), dur*1000 + 200);
+    }, i*40);
+  }
+}
+
+/* =========================================================
+   🎬 CINÉMATIQUE D'INTRO
+   ========================================================= */
+
+// Configuration de la cinématique : chaque "scène" a un chapitre, un texte avec mise en forme,
+// et un texte "brut" qui sera lu par la voix.
+const CINEMATIC_SCENES = [
+  {
+    chapter: "// CHAPITRE 1 — LE PROTAGONISTE //",
+    htmlText: `Nous sommes le <span class="cine-highlight">20 mai 2026</span>.<br><br>Un homme s'apprête à vivre une journée pas comme les autres.<br><br>Son nom : <span class="cine-highlight-cyan">Bastien</span>.`,
+    voiceText: "Nous sommes le 20 mai 2026. Un homme s'apprête à vivre une journée pas comme les autres. Son nom : Bastien.",
+    duration: 7000
+  },
+  {
+    chapter: "// CHAPITRE 2 — UNE VIE BIEN REMPLIE //",
+    htmlText: `Né un matin de printemps de l'année <span class="cine-highlight">1996</span>, Bastien fête aujourd'hui ses <span class="cine-highlight-pink">30 ans</span>.<br><br>Trente années d'aventures, de projets, de victoires.`,
+    voiceText: "Né un matin de printemps de l'année 1996, Bastien fête aujourd'hui ses 30 ans. Trente années d'aventures, de projets, de victoires.",
+    duration: 7000
+  },
+  {
+    chapter: "// CHAPITRE 3 — CE QUI COMPTE //",
+    htmlText: `Une <span class="cine-highlight-pink">femme</span> qu'il aime plus que tout.<br>Un <span class="cine-highlight-cyan">fils</span> qui grandit trop vite.<br>Une <span class="cine-highlight">famille</span> soudée.<br><br>Et puis... sa vraie obsession :<br><br><span class="cine-highlight-cyan" style="font-size: 1.3em;">LE PADEL.</span>`,
+    voiceText: "Une femme qu'il aime plus que tout. Un fils qui grandit trop vite. Une famille soudée. Et puis... sa vraie obsession : le padel.",
+    duration: 9000
+  },
+  {
+    chapter: "// CHAPITRE 4 — LE COURT, SON ROYAUME //",
+    htmlText: `Cette passion qui le fait courir sur les terrains dès qu'il a une minute.<br><br>Raquette en main. En quête du smash parfait.<br><br>Bastien est un homme heureux.<br><br><span class="cine-highlight-pink">Mais cette nuit...</span>`,
+    voiceText: "Cette passion qui le fait courir sur les terrains dès qu'il a une minute. Raquette en main. En quête du smash parfait. Bastien est un homme heureux. Mais cette nuit...",
+    duration: 10000
+  },
+  {
+    chapter: "// CHAPITRE 5 — LE COMPLOT //",
+    htmlText: `Cette nuit, pendant que Bastien dormait...<br><br>Son propre <span class="cine-highlight-cyan">fils</span> a mené l'opération la plus audacieuse de sa courte vie.<br><br>Avec la complicité de toute la famille, il s'est emparé des <span class="cine-highlight">cadeaux d'anniversaire</span> de son père.<br><br>Et il les a cachés.`,
+    voiceText: "Cette nuit, pendant que Bastien dormait, son propre fils a mené l'opération la plus audacieuse de sa courte vie. Avec la complicité de toute la famille, il s'est emparé des cadeaux d'anniversaire de son père. Et il les a cachés.",
+    duration: 11000
+  },
+  {
+    chapter: "// CHAPITRE 6 — LES 4 CADENAS //",
+    htmlText: `Quatre coffres.<br>Quatre cadenas verrouillés.<br><br>Et un seul moyen de les ouvrir :<br><br>prouver que Bastien connaît mieux que personne <span class="cine-highlight">les gens qui l'entourent</span>.`,
+    voiceText: "Quatre coffres. Quatre cadenas verrouillés. Et un seul moyen de les ouvrir : prouver que Bastien connaît mieux que personne les gens qui l'entourent.",
+    duration: 9500
+  },
+  {
+    chapter: "// CHAPITRE 7 — LA MISSION //",
+    htmlText: `Bastien...<br><br>Pour récupérer <span class="cine-highlight-pink">tes cadeaux</span>, tu vas devoir résoudre les énigmes que ton fils et tes proches ont préparées.<br><br>Tu connais ces gens. Tu les aimes.<br><br>Aujourd'hui, ils vont tester à quel point.`,
+    voiceText: "Bastien. Pour récupérer tes cadeaux, tu vas devoir résoudre les énigmes que ton fils et tes proches ont préparées. Tu connais ces gens. Tu les aimes. Aujourd'hui, ils vont tester à quel point.",
+    duration: 11000
+  },
+  {
+    chapter: "// CHAPITRE 8 — L'OPÉRATION COMMENCE //",
+    htmlText: `<span class="cine-highlight" style="font-size: 1.4em;">L'OPÉRATION TRÉSOR</span><br><br>commence<br><br><span class="cine-highlight-cyan" style="font-size: 1.4em;">MAINTENANT.</span>`,
+    voiceText: "L'opération Trésor commence maintenant. Bonne chance, Bastien.",
+    duration: 6000
+  }
+];
+
+/* =========================================================
+   🎙️ CONFIGURATION VOIX NARRATIVE
+   =========================================================
+   OPTION 1 (recommandée) : Vraie voix enregistrée
+   - Génère ta voix sur ElevenLabs.io (gratuit, voix masculine grave française)
+   - Sauvegarde le fichier MP3 à côté de ce HTML
+   - Renseigne le nom du fichier dans NARRATION_AUDIO_URL ci-dessous
+   - Le jeu jouera le MP3 + lancera les sous-titres en parallèle
+
+   OPTION 2 (fallback) : Synthèse vocale du navigateur
+   - Laisse NARRATION_AUDIO_URL à null
+   - Le navigateur va lire les textes avec sa voix par défaut (moins bonne qualité)
+*/
+const NARRATION_AUDIO_URL = "./audio/intro.mp3";
+
+// 🎵 Musique de fond (MP3). Mettre null pour utiliser la musique générée Web Audio à la place.
+const MUSIC_AUDIO_URL = "./audio/ambiance.mp3";
+
+// Volumes (0.0 à 1.0) — la voix doit être plus forte que la musique
+const VOLUME_NARRATION = 1.0;
+const VOLUME_MUSIC = 0.22;
+
+// 🎬 Vidéo de fond pendant la cinématique (sans son). Mettre null pour ne pas afficher de vidéo.
+const VIDEO_INTRO_URL = "./video/intro.mov";
+
+// Durée totale du MP3 si tu en utilises un (en secondes) — sert à synchroniser les sous-titres
+const NARRATION_AUDIO_TOTAL_DURATION_S = 80;
+
+let cineState = {
+  index: 0,
+  voiceEnabled: true,
+  currentUtterance: null,
+  currentTimeout: null,
+  selectedVoice: null,
+  finished: false,
+  audioElement: null,
+  musicElement: null
+};
+
+// Choisir la meilleure voix masculine grave française
+function pickFrenchMaleVoice() {
+  const voices = speechSynthesis.getVoices();
+  const priorities = [
+    v => v.lang.startsWith("fr") && /male|homme|thomas|paul|nicolas|henri|jean|pierre/i.test(v.name),
+    v => v.lang.startsWith("fr") && !/female|femme|amélie|marie|julie|virginie|audrey/i.test(v.name),
+    v => v.lang.startsWith("fr"),
+    v => v.lang.startsWith("fr-FR"),
+    v => true
+  ];
+  for (const filter of priorities) {
+    const found = voices.find(filter);
+    if (found) return found;
+  }
+  return voices[0] || null;
+}
+
+function loadVoices() {
+  return new Promise(resolve => {
+    if (!("speechSynthesis" in window)) { resolve([]); return; }
+    let voices = speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      cineState.selectedVoice = pickFrenchMaleVoice();
+      resolve(voices);
+    } else {
+      speechSynthesis.onvoiceschanged = () => {
+        voices = speechSynthesis.getVoices();
+        cineState.selectedVoice = pickFrenchMaleVoice();
+        resolve(voices);
+      };
+      // Timeout de sécurité
+      setTimeout(() => resolve([]), 1500);
+    }
+  });
+}
+
+function speakText(text) {
+  // Si on utilise un MP3, on ne fait pas de synthèse vocale par-dessus
+  if (NARRATION_AUDIO_URL) return;
+  if (!cineState.voiceEnabled || !("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  if (cineState.selectedVoice) utterance.voice = cineState.selectedVoice;
+  utterance.lang = "fr-FR";
+  utterance.rate = 0.85;
+  utterance.pitch = 0.7;
+  utterance.volume = 1.0;
+  cineState.currentUtterance = utterance;
+  speechSynthesis.speak(utterance);
+}
+
+function toggleVoice() {
+  cineState.voiceEnabled = !cineState.voiceEnabled;
+  const btn = document.getElementById("cine-mute-btn");
+  if (cineState.voiceEnabled) {
+    btn.innerHTML = "🔊 VOIX";
+    setNarrationVolume(VOLUME_NARRATION);
+  } else {
+    btn.innerHTML = "🔇 VOIX";
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    setNarrationVolume(0);
+  }
+}
+
+function toggleMusic() {
+  const btn = document.getElementById("cine-music-btn");
+  // Si audio HTML cinématique actif
+  if (cineAudio.music) {
+    if (cineAudio.musicMuted) {
+      setMusicVolume(VOLUME_MUSIC);
+      cineAudio.musicMuted = false;
+      btn.innerHTML = "🎵 MUSIQUE";
+    } else {
+      setMusicVolume(0);
+      cineAudio.musicMuted = true;
+      btn.innerHTML = "🔇 MUSIQUE";
+    }
+    return;
+  }
+  // Fallback Web Audio ambient
+  if (!ambientState.playing) {
+    startAmbientMusic();
+    ambientState.muted = false;
+    btn.innerHTML = "🎵 MUSIQUE";
+    return;
+  }
+  if (ambientState.muted) {
+    setAmbientVolume(0.18);
+    ambientState.muted = false;
+    btn.innerHTML = "🎵 MUSIQUE";
+  } else {
+    setAmbientVolume(0);
+    ambientState.muted = true;
+    btn.innerHTML = "🔇 MUSIQUE";
+  }
+}
+
+// Affichage progressif du texte (effet typewriter sur HTML)
+function typewriteHTML(element, html, durationMs) {
+  element.innerHTML = "";
+  // On va animer caractère par caractère, mais en préservant les balises HTML
+  // Pour ça, on parse le HTML et on construit progressivement
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+
+  // Extraire le texte complet pour calculer la vitesse
+  const fullText = tmp.textContent;
+  const charDelay = Math.max(20, Math.min(80, durationMs / Math.max(fullText.length, 1) * 0.6));
+
+  let charIndex = 0;
+  const cursor = '<span class="cine-cursor"></span>';
+
+  function step() {
+    charIndex++;
+    // Reconstruire le HTML jusqu'au charIndex
+    let displayed = renderHTMLUpTo(html, charIndex);
+    element.innerHTML = displayed + cursor;
+    if (charIndex < fullText.length) {
+      cineState.currentTimeout = setTimeout(step, charDelay);
+    } else {
+      // Retirer le curseur à la fin
+      element.innerHTML = html;
+    }
+  }
+  step();
+}
+
+// Renvoie le HTML de `source` jusqu'à `maxChars` caractères visibles (ignore les tags)
+function renderHTMLUpTo(source, maxChars) {
+  let result = "";
+  let visibleCount = 0;
+  let i = 0;
+  while (i < source.length && visibleCount < maxChars) {
+    if (source[i] === "<") {
+      // Copier la balise entière
+      const end = source.indexOf(">", i);
+      if (end === -1) break;
+      result += source.substring(i, end + 1);
+      i = end + 1;
+    } else if (source[i] === "&") {
+      // Entité HTML, considère comme 1 char visible
+      const end = source.indexOf(";", i);
+      if (end === -1) { result += source[i]; i++; visibleCount++; continue; }
+      result += source.substring(i, end + 1);
+      i = end + 1;
+      visibleCount++;
+    } else {
+      result += source[i];
+      i++;
+      visibleCount++;
+    }
+  }
+  // Compléter toutes les balises ouvertes restantes pour ne pas casser le HTML
+  return result;
+}
+
+function playCinematicScene(index) {
+  if (index >= CINEMATIC_SCENES.length) {
+    // Fin de la cinématique : afficher le bouton start
+    cineState.finished = true;
+    document.getElementById("cine-start-btn").classList.add("visible");
+    return;
+  }
+  cineState.index = index;
+  const scene = CINEMATIC_SCENES[index];
+
+  // Chapitre fade in
+  const chapterEl = document.getElementById("cine-chapter");
+  chapterEl.textContent = scene.chapter;
+  chapterEl.classList.remove("visible");
+  setTimeout(() => chapterEl.classList.add("visible"), 100);
+
+  // Voix
+  speakText(scene.voiceText);
+
+  // Texte avec typewriter
+  const textEl = document.getElementById("cine-text");
+  typewriteHTML(textEl, scene.htmlText, scene.duration);
+
+  // Passer à la scène suivante
+  cineState.currentTimeout = setTimeout(() => {
+    playCinematicScene(index + 1);
+  }, scene.duration);
+}
+
+function startCinematic() {
+  showScreen("screen-cinematic");
+  document.getElementById("cine-start-btn").classList.remove("visible");
+  cineState.finished = false;
+  spawnCineParticles();
+
+  // 🎬 Lancer la vidéo de fond (muette, en boucle au cas où elle est plus courte que l'audio)
+  const videoEl = document.getElementById("cine-video");
+  if (VIDEO_INTRO_URL && videoEl) {
+    videoEl.src = VIDEO_INTRO_URL;
+    videoEl.muted = true;
+    videoEl.loop = true;
+    videoEl.currentTime = 0;
+    videoEl.classList.remove("visible");
+    // Fade in dès que la vidéo peut jouer
+    videoEl.addEventListener("playing", () => {
+      videoEl.classList.add("visible");
+    }, { once: true });
+    videoEl.play().catch(err => {
+      console.warn("Impossible de lire la vidéo :", err);
+    });
+  }
+
+  // 🎬 Démarrer l'audio via Web Audio API
+  startCinematicAudio();
+
+  setTimeout(() => playCinematicScene(0), 600);
+}
+
+/* =========================================================
+   🎵 SYSTÈME AUDIO CINÉMATIQUE (HTML Audio natif)
+   Utilise <audio> HTML au lieu de Web Audio API fetch()
+   pour fonctionner en protocole file:// (ouverture locale)
+   ========================================================= */
+
+let cineAudio = {
+  music: null,
+  narration: null,
+  musicMuted: false,
+  narrationDelayTimeout: null
+};
+
+function startCinematicAudio() {
+  // ============ MUSIQUE DE FOND ============
+  if (MUSIC_AUDIO_URL) {
+    try {
+      cineAudio.music = new Audio(MUSIC_AUDIO_URL);
+      cineAudio.music.loop = true;
+      cineAudio.music.volume = 0;
+      cineAudio.music.play().then(() => {
+        console.log("✅ Musique lancée");
+        fadeAudioTo(cineAudio.music, VOLUME_MUSIC, 2500);
+      }).catch(err => {
+        console.warn("Impossible de lire la musique :", err);
+      });
+    } catch(e) { console.warn("Erreur musique:", e); }
+  }
+
+  // ============ NARRATION (délai 3s) ============
+  if (NARRATION_AUDIO_URL) {
+    cineAudio.narrationDelayTimeout = setTimeout(() => {
+      try {
+        cineAudio.narration = new Audio(NARRATION_AUDIO_URL);
+        cineAudio.narration.volume = VOLUME_NARRATION;
+        cineAudio.narration.play().then(() => {
+          console.log("✅ Narration lancée");
+        }).catch(err => {
+          console.warn("Impossible de lire la narration :", err);
+        });
+        cineAudio.narration.onended = () => {
+          stopCinematicAudio(1500);
+          cineState.finished = true;
+          document.getElementById("cine-start-btn").classList.add("visible");
+        };
+      } catch(e) { console.warn("Erreur narration:", e); }
+    }, 3000);
+  }
+}
+
+function stopCinematicAudio(fadeMs = 600) {
+  if (cineAudio.narrationDelayTimeout) {
+    clearTimeout(cineAudio.narrationDelayTimeout);
+    cineAudio.narrationDelayTimeout = null;
+  }
+  if (cineAudio.music) {
+    fadeAudioTo(cineAudio.music, 0, fadeMs);
+    setTimeout(() => { try { cineAudio.music.pause(); cineAudio.music.currentTime = 0; } catch(e) {} }, fadeMs + 50);
+  }
+  if (cineAudio.narration) {
+    fadeAudioTo(cineAudio.narration, 0, fadeMs);
+    setTimeout(() => { try { cineAudio.narration.pause(); cineAudio.narration.currentTime = 0; } catch(e) {} }, fadeMs + 50);
+  }
+}
+
+function setMusicVolume(vol) {
+  if (cineAudio.music) fadeAudioTo(cineAudio.music, vol, 300);
+}
+
+function setNarrationVolume(vol) {
+  if (cineAudio.narration) fadeAudioTo(cineAudio.narration, vol, 300);
+}
+
+// Helper : fade un audio HTML vers un volume cible
+function fadeAudioTo(audioEl, targetVolume, durationMs) {
+  if (!audioEl) return;
+  const startVol = audioEl.volume;
+  const startTime = performance.now();
+  function step() {
+    const elapsed = performance.now() - startTime;
+    const progress = Math.min(1, elapsed / durationMs);
+    try { audioEl.volume = Math.max(0, Math.min(1, startVol + (targetVolume - startVol) * progress)); } catch(e) {}
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  step();
+}
+
+function spawnCineParticles() {
+  const screen = document.getElementById("screen-cinematic");
+  screen.querySelectorAll(".cine-particle").forEach(p => p.remove());
+  // 50 particules pour bien remplir l'écran autour du cadre vidéo
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement("div");
+    p.className = "cine-particle";
+    p.style.left = Math.random() * 100 + "%";
+    p.style.animationDelay = (Math.random() * 6) + "s";
+    const color = ["#00ffe1", "#ff2bd6", "#ffe600"][Math.floor(Math.random() * 3)];
+    p.style.background = color;
+    p.style.color = color; // pour le box-shadow currentColor
+    screen.appendChild(p);
+  }
+}
+
+function skipCinematic() {
+  if (cineState.currentTimeout) clearTimeout(cineState.currentTimeout);
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  stopCinematicAudio(600);
+  stopAmbientMusic(800);
+  // Arrêter la vidéo
+  const videoEl = document.getElementById("cine-video");
+  if (videoEl) {
+    videoEl.classList.remove("visible");
+    videoEl.pause();
+    videoEl.currentTime = 0;
+  }
+  cineState.finished = true;
+  startGame();
+}
+
+function replayCinematic() {
+  if (cineState.currentTimeout) clearTimeout(cineState.currentTimeout);
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  stopCinematicAudio(100);
+  // Relancer la vidéo
+  const videoEl = document.getElementById("cine-video");
+  if (videoEl) {
+    videoEl.currentTime = 0;
+    videoEl.play().catch(() => {});
+  }
+  startCinematicAudio();
+  playCinematicScene(0);
+}
+
+/* =========================================================
+   🎬 CINÉMATIQUE — FIN
+   ========================================================= */
+
+
+/* Pré-remplir les joueurs et les bonnes réponses (TOUJOURS, pas juste en test) */
+function prefillPlayers() {
+  const noms = ["Benj","Guillaume","Thomas","Marine","Cedrine","Meghan","Serge","Christine","Raymond","Alex","Victoria","Hanna","Maud","Anthony","Claire","Eliott","Zac","Nini","Simon","Pauline"];
+  players = noms.map((nom, i) => ({
+    id: "p_" + i,
+    nom: nom,
+    avatar: AVATARS_DEFAULT[i % AVATARS_DEFAULT.length]
+  }));
+
+  // Pré-assigner les bonnes réponses des cadenas "qui"
+  NIVEAUX.forEach((niv, ni) => {
+    if (niv.type === 'qcm') return;
+    niv.chiffres.forEach((ch, ci) => {
+      ch.questions.forEach((qText, qi) => {
+        const key = `${ni}-${ci}-${qi}`;
+        const expectedName = ANSWER_MAP[qText];
+        const matchingPlayer = players.find(p => p.nom === expectedName);
+        if (matchingPlayer) {
+          assignments[key] = { bonneReponseId: matchingPlayer.id };
+        }
+      });
+    });
+  });
+}
+
+function showTestBanner() {
+  const banner = document.createElement("div");
+  banner.id = "test-banner";
+  banner.innerHTML = `🧪 MODE TEST ACTIVÉ — bonne réponse surlignée en jaune. Pour désactiver : <code style="color:var(--neon-cyan)">TEST_MODE = false</code> dans le code.`;
+  banner.style.cssText = `
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(255, 230, 0, 0.15);
+    border-top: 2px solid var(--neon-yellow);
+    color: var(--neon-yellow);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 8px 16px;
+    text-align: center;
+    letter-spacing: 0.1em;
+    z-index: 200;
+    text-shadow: 0 0 6px var(--neon-yellow);
+  `;
+  document.body.appendChild(banner);
+}
+
+// Au chargement de la page
+window.addEventListener("DOMContentLoaded", () => {
+  prefillPlayers();
+  if (TEST_MODE) showTestBanner();
+});
+</script>
+</body>
+</html>
