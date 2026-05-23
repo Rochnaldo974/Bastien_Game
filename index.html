@@ -1061,6 +1061,60 @@ textarea.text-input { resize: vertical; min-height: 50px; }
   transform: translateY(0);
 }
 
+/* ============ FIN D'INTRO — ÉCRAN CENTRAL ============ */
+.cine-end-screen {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: radial-gradient(ellipse at center, rgba(0,20,30,0.95) 0%, rgba(0,0,0,0.98) 70%);
+  text-align: center;
+  padding: 32px;
+}
+.cine-end-screen.visible {
+  display: flex;
+  animation: fadeIn 1s ease;
+}
+.cine-end-icon {
+  font-size: 3.5rem;
+  animation: endPulse 2s ease-in-out infinite;
+}
+@keyframes endPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.cine-end-title {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 6vw, 2.8rem);
+  color: var(--neon-cyan);
+  text-shadow: 0 0 30px rgba(0, 255, 225, 0.7), 0 0 60px rgba(0, 255, 225, 0.3);
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+}
+.cine-end-sub {
+  font-family: var(--mono);
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 400px;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+}
+.cine-end-btn {
+  margin-top: 12px;
+  font-size: 1.1rem;
+  padding: 16px 36px;
+  animation: btnGlow 2s ease-in-out infinite;
+}
+@keyframes btnGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(57, 255, 20, 0.7), 0 0 60px rgba(57, 255, 20, 0.3); }
+}
+
 /* ============ SLOT MACHINE — OUVERTURE CADENAS ============ */
 #screen-unlock { justify-content: center; text-align: center; padding-top: 50px; }
 .unlock-title {
@@ -1433,6 +1487,13 @@ textarea.text-input { resize: vertical; min-height: 50px; }
     <div class="cine-controls">
       <button class="btn green cine-start-btn" id="cine-start-btn" onclick="startGame()">▶ COMMENCER L'OPÉRATION</button>
     </div>
+  </div>
+  <!-- Écran fin d'intro -->
+  <div class="cine-end-screen" id="cine-end-screen">
+    <div class="cine-end-icon">🎂</div>
+    <div class="cine-end-title">MAINTENANT,<br>À TOI DE JOUER.</div>
+    <div class="cine-end-sub">Les cadenas t'attendent. Prouve que tu connais tes proches.</div>
+    <button class="btn green cine-end-btn" id="cine-end-btn" onclick="startGame()">▶ COMMENCER L'OPÉRATION</button>
   </div>
 </div>
 
@@ -3095,16 +3156,7 @@ function playCinematicScene(index) {
     if (cineAudio.narration && !cineAudio.narration.ended) return;
     // Sinon afficher l'écran final
     cineState.finished = true;
-    const vid = document.getElementById("cine-video");
-    if (vid) vid.classList.remove("visible");
-    const chapterEl = document.getElementById("cine-chapter");
-    chapterEl.style.display = "none";
-    const textEl = document.getElementById("cine-text");
-    textEl.style.display = "block";
-    textEl.innerHTML = '<span style="font-size:1.6em; color:var(--neon-cyan); text-shadow:0 0 20px var(--neon-cyan);">MAINTENANT,<br>À TOI DE JOUER.</span>';
-    setTimeout(() => {
-      document.getElementById("cine-start-btn").classList.add("visible");
-    }, 800);
+    showCineEndScreen();
     return;
   }
   cineState.index = index;
@@ -3201,20 +3253,7 @@ function startCinematicAudio() {
         cineAudio.narration.onended = () => {
           stopCinematicAudio(1500);
           cineState.finished = true;
-          // Cacher la vidéo en fondu
-          const vid = document.getElementById("cine-video");
-          if (vid) vid.classList.remove("visible");
-          // Cacher chapitre
-          const chapterEl = document.getElementById("cine-chapter");
-          chapterEl.style.display = "none";
-          // Afficher le message final
-          const textEl = document.getElementById("cine-text");
-          textEl.style.display = "block";
-          textEl.innerHTML = '<span style="font-size:1.6em; color:var(--neon-cyan); text-shadow:0 0 20px var(--neon-cyan);">MAINTENANT,<br>À TOI DE JOUER.</span>';
-          // Afficher le bouton
-          setTimeout(() => {
-            document.getElementById("cine-start-btn").classList.add("visible");
-          }, 800);
+          showCineEndScreen();
         };
       } catch(e) { console.warn("Erreur narration:", e); }
     }, 3000);
@@ -3272,6 +3311,18 @@ function spawnCineParticles() {
     p.style.color = color; // pour le box-shadow currentColor
     screen.appendChild(p);
   }
+}
+
+function showCineEndScreen() {
+  // Cacher la vidéo
+  const vid = document.getElementById("cine-video");
+  if (vid) { vid.classList.remove("visible"); vid.pause(); }
+  // Cacher le skip, le container texte
+  const skip = document.querySelector(".cine-skip");
+  if (skip) skip.style.display = "none";
+  document.querySelector(".cine-container").style.display = "none";
+  // Afficher l'écran de fin
+  document.getElementById("cine-end-screen").classList.add("visible");
 }
 
 function skipCinematic() {
